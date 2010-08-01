@@ -75,7 +75,7 @@
             %>
             <tr>
                 <td>
-                    <a href="?path=<%= e.getPath() %>&amp;type=content"><%= e.getPath() %>
+                    <a href="?path=<%= e.getPath() %>&amp;type=content&amp;range=1-50"><%= e.getPath() %>
                     </a>
                     <% if (!e.isDirectory()) { %>
                         <a href="?path=<%= e.getPath() %>&amp;type=content&amp;raw=true">(raw)</a>

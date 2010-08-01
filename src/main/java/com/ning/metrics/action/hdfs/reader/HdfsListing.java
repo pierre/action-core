@@ -38,6 +38,8 @@ public class HdfsListing
     private final boolean raw;
     private final FileSystem fs;
     private final RowFileContentsIteratorFactory rowFileContentsIteratorFactory;
+    private int startLine = 0;
+    private int endLine = -1;
 
     public HdfsListing(FileSystem fileSystem, Path path, boolean raw, RowFileContentsIteratorFactory rowFileContentsIteratorFactory, String type, boolean recursive) throws IOException
     {

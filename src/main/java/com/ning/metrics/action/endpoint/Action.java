@@ -46,6 +46,7 @@ public class Action
      *
      * @param path      path in HDFS to render (directory listing or file), defaults to /
      * @param type      optional, serialization type (avrojson, avrodata, thrift, text)
+     * @param range     optional, bucket of lines to read (e.g. 200-250) (used in the content.jsp only)
      * @param raw       optional, whether to try to deserialize
      * @param recursive optional, whether to crawl all files under a directory
      * @return Viewable to render the jsp
@@ -56,6 +57,7 @@ public class Action
     public Viewable getContent(
         @QueryParam("path") String path,
         @QueryParam("type") String type,
+        @QueryParam("range") String range,
         @QueryParam("raw") boolean raw,
         @QueryParam("recursive") boolean recursive
     ) throws IOException
@@ -70,8 +72,12 @@ public class Action
             return new Viewable("/hdfs/listing.jsp", hdfsReader.getListing(path));
         }
         else {
-            // TODO: raw -> plain text?
-            return new Viewable("/hdfs/content.jsp", hdfsReader.getListing(path, type, raw, recursive));
+            if (raw) {
+                return new Viewable("/hdfs/contentRaw.jsp", hdfsReader.getListing(path, type, raw, recursive));
+            }
+            else {
+                return new Viewable("/hdfs/content.jsp", hdfsReader.getListing(path, type, raw, recursive));
+            }
         }
     }
 }

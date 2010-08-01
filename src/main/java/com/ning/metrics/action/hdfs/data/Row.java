@@ -19,8 +19,8 @@ package com.ning.metrics.action.hdfs.data;
 import com.ning.metrics.action.hdfs.TextSchema;
 import com.ning.metrics.action.hdfs.data.key.ColumnKey;
 import com.ning.metrics.action.hdfs.data.transformer.ColumnKeyTransformer;
-import com.ning.serialization.DataItem;
 import com.ning.serialization.DataItemDeserializer;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableUtils;
 
@@ -36,35 +36,30 @@ public class Row implements WritableComparable
     private static final String DELIM = ",";
 
     private final TextSchema schema;
-    private List<DataItem> data;
+    private List<Writable> data;
 
     //TODO: consider doing a value-copy of TextSchema to ensure each row has its own copy
-    public Row(TextSchema schema, List<? extends DataItem> data)
+    public Row(TextSchema schema, List<Writable> data)
     {
         if (schema.getNumBaseCols() != data.size()) {
             throw new IllegalArgumentException(String.format("schema specifies %d columns.  Only %d specied in data", schema.getNumBaseCols(), data.size()));
         }
 
         this.schema = schema;
-        if (data.size() > 0) {
-            this.data.addAll(data);
-        }
-        else {
-            this.data = new ArrayList<DataItem>();
-        }
+        this.data = data;
     }
 
-    public Row(TextSchema schema, DataItem... data)
+    public Row(TextSchema schema, Writable... data)
     {
         this(schema, Arrays.asList(data));
     }
 
     public Row(TextSchema schema)
     {
-        this(schema, new ArrayList<DataItem>());
+        this(schema, new ArrayList<Writable>());
     }
 
-    public DataItem get(ColumnKey key) throws RowAccessException
+    public Writable get(ColumnKey key) throws RowAccessException
     {
         if (key instanceof ColumnKeyTransformer) {
             applyTransformer((ColumnKeyTransformer) key);
@@ -92,7 +87,7 @@ public class Row implements WritableComparable
         return schema.hasColumnKey(key);
     }
 
-    public Row addCol(ColumnKey key, DataItem value)
+    public Row addCol(ColumnKey key, Writable value)
     {
         int pos = data.size();
 
@@ -107,7 +102,7 @@ public class Row implements WritableComparable
         schema.write(out);
         WritableUtils.writeVInt(out, data.size());
 
-        for (DataItem dataItem : data) {
+        for (Writable dataItem : data) {
             dataItem.write(out);
         }
     }
@@ -118,7 +113,7 @@ public class Row implements WritableComparable
 
         int size = WritableUtils.readVInt(in);
 
-        data = new ArrayList<DataItem>(size);
+        data = new ArrayList<Writable>(size);
 
         for (int i = 0; i < size; i++) {
             data.add(new DataItemDeserializer().fromHadoop(in));
@@ -130,10 +125,10 @@ public class Row implements WritableComparable
         Row thing = (Row) o;
         int result = schema.compareTo(thing.schema);
 
-        if (result == 0) {
+        if (result == 0 && o instanceof WritableComparable) {
             for (int i = 0; i < data.size() && i < thing.data.size(); i++) {
-                DataItem thisDataItem = data.get(i);
-                DataItem thingDataItem = thing.data.get(i);
+                WritableComparable thisDataItem = (WritableComparable) data.get(i);
+                Writable thingDataItem = thing.data.get(i);
 
                 result = thisDataItem.compareTo(thingDataItem);
 
@@ -165,12 +160,12 @@ public class Row implements WritableComparable
         StringBuilder sb = new StringBuilder(data.size() * 32);
         boolean first = true;
 
-        for (DataItem item : data) {
+        for (Writable item : data) {
             if (!first) {
                 sb.append(delimiter);
             }
 
-            sb.append(item.getString());
+            sb.append(item.toString());
 
             first = false;
         }

@@ -36,10 +36,15 @@ public class DynamicColumnKey implements ColumnKey
         this.keyName = keyName;
     }
 
+    public DynamicColumnKey(String keyName, RowTransformer transformer)
+    {
+        this.keyName = keyName;
+        this.transformer = transformer;
+    }
+
     public DynamicColumnKey(ColumnKey sourceKey)
     {
-        this.keyName = sourceKey.getKeyName();
-        this.transformer = sourceKey.getRowTransformer();
+        this(sourceKey.getKeyName(), sourceKey.getRowTransformer());
     }
 
     public String getKeyName()

@@ -21,9 +21,9 @@ import com.ning.metrics.action.hdfs.data.Row;
 import com.ning.metrics.action.hdfs.data.RowAccessException;
 import com.ning.metrics.action.hdfs.data.key.ColumnKey;
 import com.ning.metrics.action.hdfs.data.key.DynamicColumnKey;
-import com.ning.serialization.DataItem;
 import com.ning.serialization.ThriftEnvelope;
 import com.ning.serialization.ThriftField;
+import org.apache.hadoop.io.Writable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +42,7 @@ public class ThriftEnvelopeRowSerializer implements RowSerializer
         ThriftEnvelope envelope = (ThriftEnvelope) value;
 
         List<ThriftField> payload = envelope.getPayload();
-        List<DataItem> data = new ArrayList<DataItem>(payload.size());
+        List<Writable> data = new ArrayList<Writable>(payload.size());
         List<ColumnKey> columnKeyList = new ArrayList<ColumnKey>(payload.size());
 
         for (ThriftField aPayload : payload) {

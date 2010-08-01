@@ -1,5 +1,7 @@
 <%@ page import="com.ning.metrics.action.hdfs.data.RowFileContentsIterator" %>
 <%@ page import="com.ning.metrics.action.hdfs.reader.HdfsEntry" %>
+<%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@page contentType="text/html" %>
 
 <%--
   ~ Copyright 2010 Ning, Inc.
@@ -42,21 +44,50 @@
                          type="com.ning.metrics.action.hdfs.reader.HdfsListing"
                          scope="request">
             </jsp:useBean>
+            <%
+                int startLine = 1;
+                int endLine = -1;
+
+                String range = request.getParameter("range");
+                if (range != null) {
+                    String[] rangeArray = StringUtils.split(range, "-");
+                    if (rangeArray.length == 2) {
+                        startLine = Integer.parseInt(rangeArray[0]);
+                        endLine = Integer.parseInt(rangeArray[1]);
+                    }
+                }
+
+                if (startLine > endLine) {
+                    startLine = 1;
+                    endLine = -1;
+                }
+                int snippetLength = endLine - startLine + 1;
+            %>
             <tr>
-                <th>File <%= it.getPath() %></th>
+                <th>File <%= it.getPath() %> <% if (endLine != -1) { %>(lines <%= startLine %> to <%= endLine %>, <a
+                        href="?path=<%= it.getPath() %>&amp;range=<%= endLine+1 %>-<%= endLine + snippetLength %>">next <%= snippetLength %>
+                    lines</a>)<% }%>
+                </th>
             </tr>
             <%
+                int currentLine = 1;
                 for (int i = 0; i < it.getEntries().size(); i++) {
                     HdfsEntry e = it.getEntries().get(i);
             %>
             <% RowFileContentsIterator content = e.getContent();
                 while (content.hasNext()) {
             %>
+            <% if (currentLine >= startLine && (currentLine <= endLine || endLine == -1)) {%>
             <tr>
                 <td>
                     <%= content.next().toString() %>
                 </td>
             </tr>
+            <% } else { content.next(); } %>
+            <% currentLine++; %>
+            <% if (endLine != -1 && endLine < currentLine) {
+                break;
+            } %>
             <% } %>
             <%
                 }
