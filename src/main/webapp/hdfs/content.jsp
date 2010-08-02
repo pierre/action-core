@@ -1,6 +1,9 @@
+<%@ page import="com.ning.metrics.action.hdfs.data.Row" %>
 <%@ page import="com.ning.metrics.action.hdfs.data.RowFileContentsIterator" %>
 <%@ page import="com.ning.metrics.action.hdfs.reader.HdfsEntry" %>
+<%@ page import="org.apache.commons.codec.binary.Base64" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="java.net.URLEncoder" %>
 <%@page contentType="text/html" %>
 
 <%--
@@ -35,7 +38,6 @@
         <h1>HDFS browser</h1>
     </div>
 </div>
-
 
 <div id="main">
     <div id="resultsWrapper">
@@ -73,23 +75,29 @@
                 int currentLine = 1;
                 for (int i = 0; i < it.getEntries().size(); i++) {
                     HdfsEntry e = it.getEntries().get(i);
+                    RowFileContentsIterator content = e.getContent();
+                    while (content.hasNext()) {
+                        if (currentLine >= startLine && (currentLine <= endLine || endLine == -1)) {
             %>
-            <% RowFileContentsIterator content = e.getContent();
-                while (content.hasNext()) {
-            %>
-            <% if (currentLine >= startLine && (currentLine <= endLine || endLine == -1)) {%>
             <tr>
                 <td>
-                    <%= content.next().toString() %>
+                    <% Row currentContent = content.next(); %>
+                    <a id="row_<%= currentLine %>" href="action/viewer?object=<%= URLEncoder.encode(new String(Base64.encodeBase64(currentContent.toJSON().getBytes())), "UTF-8") %>" target="_blank">
+                        <%= currentContent.toString() %>
+                    </a>
                 </td>
             </tr>
-            <% } else { content.next(); } %>
-            <% currentLine++; %>
-            <% if (endLine != -1 && endLine < currentLine) {
-                break;
-            } %>
-            <% } %>
             <%
+                        }
+                        else {
+                            content.next();
+                        }
+                        currentLine++;
+
+                        if (endLine != -1 && endLine < currentLine) {
+                            break;
+                        }
+                    }
                 }
             %>
         </table>

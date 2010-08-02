@@ -23,10 +23,13 @@ import com.ning.serialization.DataItemDeserializer;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableUtils;
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonGenerator;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,10 +44,6 @@ public class Row implements WritableComparable
     //TODO: consider doing a value-copy of TextSchema to ensure each row has its own copy
     public Row(TextSchema schema, List<Writable> data)
     {
-        if (schema.getNumBaseCols() != data.size()) {
-            throw new IllegalArgumentException(String.format("schema specifies %d columns.  Only %d specied in data", schema.getNumBaseCols(), data.size()));
-        }
-
         this.schema = schema;
         this.data = data;
     }
@@ -148,6 +147,24 @@ public class Row implements WritableComparable
         }
 
         return result;
+    }
+
+    public String toJSON() throws IOException
+    {
+        JsonFactory f = new JsonFactory();
+        StringWriter s = new StringWriter();
+        JsonGenerator g = f.createJsonGenerator(s);
+
+        int i = 0;
+        g.writeStartObject();
+        for (Writable item : data) {
+            g.writeStringField(String.format("Field_%d", i), item.toString());
+            i++;
+        }
+        g.writeEndObject();
+        g.flush();
+
+        return s.toString();
     }
 
     public String toString(String delimiter)

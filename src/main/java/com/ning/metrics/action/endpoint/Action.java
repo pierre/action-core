@@ -19,13 +19,19 @@ package com.ning.metrics.action.endpoint;
 import com.google.inject.Inject;
 import com.ning.metrics.action.hdfs.reader.HdfsReaderEndPoint;
 import com.sun.jersey.api.view.Viewable;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.util.LinkedHashMap;
 
 @Path("action")
 public class Action
@@ -79,6 +85,27 @@ public class Action
                 return new Viewable("/hdfs/content.jsp", hdfsReader.getListing(path, type, raw, recursive));
             }
         }
+    }
+
+    @GET
+    @Path("/viewer")
+    @Produces("text/plain")
+    public Viewable getOneContent(
+        @QueryParam("object") String object) throws IOException
+    {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ObjectMapper mapper = new ObjectMapper();
+
+        String objectURIDecoded = URLDecoder.decode(object, "UTF-8");
+        byte[] objectBase64Decoded = Base64.decodeBase64(objectURIDecoded.getBytes());
+
+        mapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
+        LinkedHashMap map = mapper.readValue(new String(objectBase64Decoded), LinkedHashMap.class);
+
+        // We need to re-serialize the json (pretty print works only on serialization)
+        mapper.writeValue(out, map);
+
+        return new Viewable("/hdfs/contentJSON.jsp", new String(out.toByteArray()));
     }
 }
 
