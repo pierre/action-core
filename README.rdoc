@@ -43,7 +43,7 @@ and specify it on the command line, e.g.:
 When clicking on a row, an exploded content of the row is show as JSON. By default, each column is labeled as "Field_...".
 This can be overridden by implementing the Registrar interface.
 
-action-core supports out of the box Goodwill (see http://github.com/pierre/goodwill) which is a type HTTP based type registrar.
+action-core supports out of the box Goodwill (see http://github.com/pierre/goodwill) which is an HTTP based type registrar.
 
 = Build
 
