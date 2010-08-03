@@ -1,0 +1,56 @@
+= action-core
+
+The action-core is an HDFS endpoint. Unlike the browser shipped with the Hadoop namenode, it integrates a de-serialization
+mechanism to read files content.
+
+= Usage
+
+    mvn -Daction.hadoop.namenode.url=hdfs://namenode.mycompany.com:9000 jetty:run
+
+You can now browse HDFS:
+
+  http://127.0.0.1:8080/metrics.action/action
+
+
+== Query parameters
+
+* path: path to open in HDFS
+* range: when opening a file, bucket of lines to display (e.g. range=1-50 for the first 51 lines)
+* raw: whether to display the nice, HTML version (raw=true) or plain text (raw=false)
+* recursive: whether to craw a directory recursively. If you want to download all content under /user/pierre:
+
+    curl 'http://127.0.0.1:8080/metrics.action/action?path=/user/pierre&recursive=true&raw=true'
+
+
+== Notes on serialization
+
+You can specify your custom serialization classes (which implement org.apache.hadoop.io.serializer.Serialization<T>) on the command line
+(make sure to escape the comma):
+
+    -Daction.hadoop.io.serializations=com.mycompany.FuuBarSerialization\,org.apache.hadoop.io.serializer.WritableSerialization
+
+
+The action-core implements two different row renderers, one for ThriftEnvelope (see http://github.com/pierre/serialization) and one for
+org.apache.hadoop.io.Text. This means that if you use the collector (see http://github.com/pierre/collector) or plain text files, the
+action-core should work out of the box. Otherwise, you need to implement your renderer (see com.ning.metrics.action.hdfs.data.parser.RowSerializer)
+and specify it on the command line, e.g.:
+
+    -Daction.hadoop.io.row.serializations=com.mycompany.FuuBarRowSerializer\,com.ning.metrics.action.hdfs.data.parser.WritableRowSerializer
+
+
+== Documenting schemas
+
+When clicking on a row, an exploded content of the row is show as JSON. By default, each column is labeled as "Field_...".
+This can be overridden by implementing the Registrar interface.
+
+action-core supports out of the box Goodwill (see http://github.com/pierre/goodwill) which is a type HTTP based type registrar.
+
+= Build
+
+    mvn package
+
+will build a war.
+
+= License
+
+See COPYING file.
