@@ -158,7 +158,7 @@ public class Row implements WritableComparable
         int i = 0;
         g.writeStartObject();
         for (Writable item : data) {
-            g.writeStringField(String.format("Field_%d", i), item.toString());
+            g.writeStringField(schema.getFieldNameByPosition(i), item.toString());
             i++;
         }
         g.writeEndObject();

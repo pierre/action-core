@@ -21,12 +21,15 @@ import com.ning.metrics.action.hdfs.data.Row;
 import com.ning.metrics.action.hdfs.data.RowAccessException;
 import com.ning.metrics.action.hdfs.data.key.ColumnKey;
 import com.ning.metrics.action.hdfs.data.key.DynamicColumnKey;
+import com.ning.metrics.action.schema.Registrar;
+import com.ning.serialization.SchemaField;
 import com.ning.serialization.ThriftEnvelope;
 import com.ning.serialization.ThriftField;
 import org.apache.hadoop.io.Writable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ThriftEnvelopeRowSerializer implements RowSerializer
 {
@@ -37,7 +40,7 @@ public class ThriftEnvelopeRowSerializer implements RowSerializer
     }
 
     @Override
-    public Row toRow(Object value) throws RowAccessException
+    public Row toRow(Registrar r, Object value) throws RowAccessException
     {
         ThriftEnvelope envelope = (ThriftEnvelope) value;
 
@@ -45,9 +48,23 @@ public class ThriftEnvelopeRowSerializer implements RowSerializer
         List<Writable> data = new ArrayList<Writable>(payload.size());
         List<ColumnKey> columnKeyList = new ArrayList<ColumnKey>(payload.size());
 
-        for (ThriftField aPayload : payload) {
-            columnKeyList.add(new DynamicColumnKey(String.format("%d", aPayload.getId())));
-            data.add(aPayload.getDataItem());
+
+        Map<Short, SchemaField> schema = r.getSchema(envelope.getTypeName());
+
+        for (ThriftField field : payload) {
+            SchemaField schemaField = null;
+            if (schema != null) {
+                schemaField = schema.get(field.getId());
+            }
+
+            if (schemaField == null) {
+                columnKeyList.add(new DynamicColumnKey(String.format("%d", field.getId())));
+            }
+            else {
+                columnKeyList.add(new DynamicColumnKey(schemaField.getName()));
+
+            }
+            data.add(field.getDataItem());
         }
 
         return new Row(new TextSchema(envelope.getTypeName(), columnKeyList), data);

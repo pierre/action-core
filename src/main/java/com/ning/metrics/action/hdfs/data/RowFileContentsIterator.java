@@ -19,6 +19,7 @@ package com.ning.metrics.action.hdfs.data;
 import com.ning.metrics.action.hdfs.TextSchema;
 import com.ning.metrics.action.hdfs.data.key.DynamicColumnKey;
 import com.ning.metrics.action.hdfs.data.parser.RowParser;
+import com.ning.metrics.action.schema.Registrar;
 import com.ning.serialization.StringDataItem;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.log4j.Logger;
@@ -38,11 +39,13 @@ public class RowFileContentsIterator implements Iterator<Row>, Closeable
     private final RowParser rowParser;
     private Row row;
     private boolean readerClosed = false;
+    private final Registrar registrar;
 
-    public RowFileContentsIterator(String pathname, RowParser rowParser, SequenceFile.Reader reader, boolean rawContents)
+    public RowFileContentsIterator(String pathname, RowParser rowParser, Registrar registrar, SequenceFile.Reader reader, boolean rawContents)
     {
         this.pathname = pathname;
         this.rowParser = rowParser;
+        this.registrar = registrar;
         this.reader = reader;
         this.renderAsRow = rawContents;
     }
@@ -113,7 +116,7 @@ public class RowFileContentsIterator implements Iterator<Row>, Closeable
                         row.addCol(new DynamicColumnKey("record"), new StringDataItem(value.toString()));
                     }
                     else {
-                        row = rowParser.valueToRow(value);
+                        row = rowParser.valueToRow(registrar, value);
                     }
                 }
                 else {

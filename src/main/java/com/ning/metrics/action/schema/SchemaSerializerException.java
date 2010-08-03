@@ -14,15 +14,27 @@
  * under the License.
  */
 
-package com.ning.metrics.action.hdfs.data.parser;
+package com.ning.metrics.action.schema;
 
-import com.ning.metrics.action.hdfs.data.Row;
-import com.ning.metrics.action.hdfs.data.RowAccessException;
-import com.ning.metrics.action.schema.Registrar;
-
-public interface RowSerializer
+public class SchemaSerializerException extends Exception
 {
-    public boolean accept(Object o);
+    public SchemaSerializerException(String message)
+    {
+        super(message);
+    }
 
-    public Row toRow(Registrar r, Object o) throws RowAccessException;
+    public SchemaSerializerException(String format, Object... args)
+    {
+        super(String.format(format, args));
+    }
+
+    public SchemaSerializerException(Throwable cause, String message)
+    {
+        super(message, cause);
+    }
+
+    public SchemaSerializerException(Throwable cause, String format, Object... args)
+    {
+        super(String.format(format, args), cause);
+    }
 }

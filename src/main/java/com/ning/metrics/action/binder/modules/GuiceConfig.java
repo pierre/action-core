@@ -25,6 +25,8 @@ import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
 import com.ning.metrics.action.binder.config.ActionCoreConfig;
 import com.ning.metrics.action.hdfs.data.RowFileContentsIteratorFactory;
+import com.ning.metrics.action.schema.GoodwillRegistrar;
+import com.ning.metrics.action.schema.Registrar;
 import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import org.skife.config.ConfigurationObjectFactory;
@@ -51,6 +53,7 @@ public class GuiceConfig extends GuiceServletContextListener
                     ActionCoreConfig config = new ConfigurationObjectFactory(System.getProperties()).build(ActionCoreConfig.class);
                     binder.bind(ActionCoreConfig.class).toInstance(config);
                     binder.bind(RowFileContentsIteratorFactory.class).asEagerSingleton();
+                    binder.bind(Registrar.class).to(GoodwillRegistrar.class).asEagerSingleton();
                 }
             },
             new ServletModule()

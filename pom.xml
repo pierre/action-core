@@ -7,6 +7,13 @@
     <artifactId>metrics.action</artifactId>
     <packaging>war</packaging>
     <version>1.0-SNAPSHOT</version>
+    <repositories>
+        <repository>
+            <id>Sonatype</id>
+            <name>Sonatype Release</name>
+            <url>http://oss.sonatype.org/content/repositories/releases</url>
+        </repository>
+    </repositories>
     <dependencies>
         <dependency>
             <groupId>joda-time</groupId>
@@ -43,11 +50,6 @@
             <artifactId>flume</artifactId>
             <version>0.9.0</version>
         </dependency>
-        <dependency>
-            <groupId>com.ning</groupId>
-            <artifactId>metrics.serialization</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
 
         <dependency>
             <!-- Required by guice 2.0 -->
@@ -59,6 +61,16 @@
             <groupId>com.google.code.guice</groupId>
             <artifactId>guice</artifactId>
             <version>2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ning</groupId>
+            <artifactId>async-http-client</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ning</groupId>
+            <artifactId>metrics.serialization</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.sun.jersey</groupId>

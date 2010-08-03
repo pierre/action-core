@@ -49,4 +49,23 @@ public class ActionCoreConfig
     {
         return "org.apache.hadoop.io.serializer.WritableSerialization";
     }
+
+    @Config(value = "action.registrar.host")
+    public String getRegistrarHost()
+    {
+        return "127.0.0.1";
+    }
+
+
+    @Config(value = "action.registrar.port")
+    public int getRegistrarPort()
+    {
+        return 8081;
+    }
+
+    @Config(value = "action.regisrtar.file")
+    public String getRegistrarStateFile()
+    {
+        return "/tmp/action/registrar/cache.ondisk";
+    }
 }

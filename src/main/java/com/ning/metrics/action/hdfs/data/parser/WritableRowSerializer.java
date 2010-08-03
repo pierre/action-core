@@ -21,6 +21,7 @@ import com.ning.metrics.action.hdfs.data.Row;
 import com.ning.metrics.action.hdfs.data.RowAccessException;
 import com.ning.metrics.action.hdfs.data.key.ColumnKey;
 import com.ning.metrics.action.hdfs.data.key.DynamicColumnKey;
+import com.ning.metrics.action.schema.Registrar;
 import com.ning.serialization.DataItem;
 import com.ning.serialization.StringDataItem;
 import org.apache.hadoop.io.Text;
@@ -38,7 +39,7 @@ public class WritableRowSerializer implements RowSerializer
     }
 
     @Override
-    public Row toRow(Object value) throws RowAccessException
+    public Row toRow(Registrar r, Object value) throws RowAccessException
     {
         Row row;
 

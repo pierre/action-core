@@ -19,6 +19,7 @@ package com.ning.metrics.action.hdfs.data;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.ning.metrics.action.hdfs.data.parser.RowParser;
+import com.ning.metrics.action.schema.Registrar;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
@@ -29,13 +30,16 @@ import java.io.IOException;
 public class RowFileContentsIteratorFactory
 {
     private final RowParser rowParser;
+    private final Registrar registrar;
 
     @Inject
     public RowFileContentsIteratorFactory(
-        RowParser rowParser
+        RowParser rowParser,
+        Registrar registrar
     )
     {
         this.rowParser = rowParser;
+        this.registrar = registrar;
     }
 
     public RowFileContentsIterator build(FileSystem fs, Path path, boolean raw) throws IOException
@@ -43,6 +47,7 @@ public class RowFileContentsIteratorFactory
         return new RowFileContentsIterator(
             path.toUri().getPath(),
             rowParser,
+            registrar,
             new SequenceFile.Reader(fs, path, fs.getConf()),
             raw);
     }

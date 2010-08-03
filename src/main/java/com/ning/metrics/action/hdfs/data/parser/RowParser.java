@@ -20,6 +20,7 @@ import com.google.inject.Inject;
 import com.ning.metrics.action.binder.config.ActionCoreConfig;
 import com.ning.metrics.action.hdfs.data.Row;
 import com.ning.metrics.action.hdfs.data.RowAccessException;
+import com.ning.metrics.action.schema.Registrar;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -64,11 +65,11 @@ public class RowParser implements Serializable
         serializations.add(serializionClass.newInstance());
     }
 
-    public Row valueToRow(Object c) throws RowAccessException
+    public Row valueToRow(Registrar r, Object c) throws RowAccessException
     {
         for (RowSerializer serialization : serializations) {
             if (serialization.accept(c)) {
-                return serialization.toRow(c);
+                return serialization.toRow(r, c);
             }
         }
         throw new RowAccessException(String.format("unknown class type: %s", c.getClass().getName()));

@@ -161,4 +161,14 @@ public class TextSchema implements WritableComparable
     {
         return String.format("base map: %s, addendum map: %s", columnMap.toString(), newColumnMap.toString());
     }
+
+    public String getFieldNameByPosition(int i)
+    {
+        for (String field : columnMap.keySet()) {
+            if (columnMap.get(field) == i) {
+                return field;
+            }
+        }
+        return String.format("Field_%d", i);
+    }
 }

@@ -14,15 +14,19 @@
  * under the License.
  */
 
-package com.ning.metrics.action.hdfs.data.parser;
+package com.ning.metrics.action.schema;
 
-import com.ning.metrics.action.hdfs.data.Row;
-import com.ning.metrics.action.hdfs.data.RowAccessException;
-import com.ning.metrics.action.schema.Registrar;
+import com.ning.serialization.SchemaField;
 
-public interface RowSerializer
+import java.util.Collection;
+import java.util.Map;
+
+public interface Registrar
 {
-    public boolean accept(Object o);
+    public String getCanonicalName(String type);
 
-    public Row toRow(Registrar r, Object o) throws RowAccessException;
+    public Collection<String> getAllTypes();
+
+    public Map<Short, SchemaField> getSchema(String type);
 }
+
