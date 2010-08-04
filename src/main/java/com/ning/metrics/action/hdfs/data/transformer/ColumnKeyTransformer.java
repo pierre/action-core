@@ -16,7 +16,7 @@
 
 package com.ning.metrics.action.hdfs.data.transformer;
 
-import com.ning.metrics.action.hdfs.data.key.ColumnKey;
+import com.ning.metrics.action.hdfs.data.schema.ColumnKey;
 
 public interface ColumnKeyTransformer extends ColumnKey, RowTransformer
 {

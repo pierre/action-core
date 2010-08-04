@@ -16,9 +16,9 @@
 
 package com.ning.metrics.action.hdfs.data;
 
-import com.ning.metrics.action.hdfs.TextSchema;
-import com.ning.metrics.action.hdfs.data.key.DynamicColumnKey;
+import com.ning.metrics.action.hdfs.data.schema.DynamicColumnKey;
 import com.ning.metrics.action.hdfs.data.parser.RowParser;
+import com.ning.metrics.action.hdfs.data.schema.RowSchema;
 import com.ning.metrics.action.schema.Registrar;
 import com.ning.serialization.StringDataItem;
 import org.apache.hadoop.io.SequenceFile;
@@ -112,7 +112,7 @@ public class RowFileContentsIterator implements Iterator<Row>, Closeable
                     Object value = reader.getCurrentValue((Object) null);
 
                     if (renderAsRow) {
-                        row = new Row(new TextSchema("ad-hoc"));
+                        row = new Row(new RowSchema("ad-hoc"));
                         row.addCol(new DynamicColumnKey("record"), new StringDataItem(value.toString()));
                     }
                     else {

@@ -16,11 +16,11 @@
 
 package com.ning.metrics.action.hdfs.data.parser;
 
-import com.ning.metrics.action.hdfs.TextSchema;
+import com.ning.metrics.action.hdfs.data.schema.ColumnKey;
+import com.ning.metrics.action.hdfs.data.schema.DynamicColumnKey;
+import com.ning.metrics.action.hdfs.data.schema.RowSchema;
 import com.ning.metrics.action.hdfs.data.Row;
 import com.ning.metrics.action.hdfs.data.RowAccessException;
-import com.ning.metrics.action.hdfs.data.key.ColumnKey;
-import com.ning.metrics.action.hdfs.data.key.DynamicColumnKey;
 import com.ning.metrics.action.schema.Registrar;
 import com.ning.serialization.DataItem;
 import com.ning.serialization.StringDataItem;
@@ -53,7 +53,7 @@ public class WritableRowSerializer implements RowSerializer
                 items[i] = new StringDataItem(data[i]);
             }
 
-            row = new Row(new TextSchema("Text", columnKeyList), items);
+            row = new Row(new RowSchema("Text", columnKeyList), items);
         }
         else if (value instanceof Row) {
             row = (Row) value;

@@ -24,5 +24,3 @@ public interface RowTransformer extends Serializable
 {
     public Row transform(Row row);
 }
-
-

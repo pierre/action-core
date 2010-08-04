@@ -16,8 +16,8 @@
 
 package com.ning.metrics.action.hdfs.data;
 
-import com.ning.metrics.action.hdfs.TextSchema;
-import com.ning.metrics.action.hdfs.data.key.ColumnKey;
+import com.ning.metrics.action.hdfs.data.schema.ColumnKey;
+import com.ning.metrics.action.hdfs.data.schema.RowSchema;
 import com.ning.metrics.action.hdfs.data.transformer.ColumnKeyTransformer;
 import com.ning.serialization.DataItemDeserializer;
 import org.apache.hadoop.io.Writable;
@@ -34,26 +34,32 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Abstraction layer for a line in a file in HDFS.
+ *
+ * @see com.ning.metrics.action.hdfs.data.schema.RowSchema
+ * @see com.ning.metrics.action.hdfs.data.schema.ColumnKey
+ */
 public class Row implements WritableComparable
 {
     private static final String DELIM = ",";
 
-    private final TextSchema schema;
+    private final RowSchema schema;
     private List<Writable> data;
 
-    //TODO: consider doing a value-copy of TextSchema to ensure each row has its own copy
-    public Row(TextSchema schema, List<Writable> data)
+    // TODO: consider doing a value-copy of RowSchema to ensure each row has its own copy
+    public Row(RowSchema schema, List<Writable> data)
     {
         this.schema = schema;
         this.data = data;
     }
 
-    public Row(TextSchema schema, Writable... data)
+    public Row(RowSchema schema, Writable... data)
     {
         this(schema, Arrays.asList(data));
     }
 
-    public Row(TextSchema schema)
+    public Row(RowSchema schema)
     {
         this(schema, new ArrayList<Writable>());
     }

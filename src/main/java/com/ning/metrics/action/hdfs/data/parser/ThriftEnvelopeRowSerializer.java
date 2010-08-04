@@ -16,11 +16,11 @@
 
 package com.ning.metrics.action.hdfs.data.parser;
 
-import com.ning.metrics.action.hdfs.TextSchema;
+import com.ning.metrics.action.hdfs.data.schema.ColumnKey;
+import com.ning.metrics.action.hdfs.data.schema.DynamicColumnKey;
+import com.ning.metrics.action.hdfs.data.schema.RowSchema;
 import com.ning.metrics.action.hdfs.data.Row;
 import com.ning.metrics.action.hdfs.data.RowAccessException;
-import com.ning.metrics.action.hdfs.data.key.ColumnKey;
-import com.ning.metrics.action.hdfs.data.key.DynamicColumnKey;
 import com.ning.metrics.action.schema.Registrar;
 import com.ning.serialization.SchemaField;
 import com.ning.serialization.ThriftEnvelope;
@@ -67,6 +67,6 @@ public class ThriftEnvelopeRowSerializer implements RowSerializer
             data.add(field.getDataItem());
         }
 
-        return new Row(new TextSchema(envelope.getTypeName(), columnKeyList), data);
+        return new Row(new RowSchema(envelope.getTypeName(), columnKeyList), data);
     }
 }

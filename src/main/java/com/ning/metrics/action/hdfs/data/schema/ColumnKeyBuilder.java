@@ -14,7 +14,7 @@
  * under the License.
  */
 
-package com.ning.metrics.action.hdfs.data.key;
+package com.ning.metrics.action.hdfs.data.schema;
 
 import com.ning.metrics.action.hdfs.data.transformer.IdentityRowTransformer;
 import com.ning.metrics.action.hdfs.data.transformer.RowTransformer;

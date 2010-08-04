@@ -60,7 +60,7 @@ public class Action
      */
     @GET
     @Produces({"text/html", "text/plain"})
-    public Viewable getContent(
+    public Viewable getListing(
         @QueryParam("path") String path,
         @QueryParam("type") String type,
         @QueryParam("range") String range,
@@ -90,7 +90,7 @@ public class Action
     @GET
     @Path("/viewer")
     @Produces("text/plain")
-    public Viewable getOneContent(
+    public Viewable prettyPrintOneLine(
         @QueryParam("object") String object) throws IOException
     {
         ByteArrayOutputStream out = new ByteArrayOutputStream();

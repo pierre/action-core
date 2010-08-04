@@ -14,10 +14,9 @@
  * under the License.
  */
 
-package com.ning.metrics.action.hdfs;
+package com.ning.metrics.action.hdfs.data.schema;
 
 import com.ning.metrics.action.hdfs.data.RowAccessException;
-import com.ning.metrics.action.hdfs.data.key.ColumnKey;
 import org.apache.hadoop.io.WritableComparable;
 
 import java.io.DataInput;
@@ -29,13 +28,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TextSchema implements WritableComparable
+/**
+ * Schema describing a Row in a file on HDFS.
+ * <p/>
+ * Each Row is associated with a Schema which defines columns in the file
+ * (columns can be values separated by a comma or a tab, or thrift/avro fields).
+ * A column is defined via the ColumnKey interface. By default, the DynamicColumnKey
+ * class is used but you can implement your own if special handling is needed.
+ *
+ * @todo Runtime discovery of custom ColumnKey
+ * @see com.ning.metrics.action.hdfs.data.Row
+ * @see ColumnKey
+ */
+public class RowSchema implements WritableComparable
 {
     private final Map<String, Integer> columnMap = new HashMap<String, Integer>();
     private final Map<String, Integer> newColumnMap = new HashMap<String, Integer>();
     private final String name;
 
-    public TextSchema(String name, List<ColumnKey> keyList)
+    public RowSchema(String name, List<ColumnKey> keyList)
     {
         int pos = 0;
 
@@ -46,17 +57,17 @@ public class TextSchema implements WritableComparable
         this.name = name;
     }
 
-    public TextSchema(String name, ColumnKey... keys)
+    public RowSchema(String name, ColumnKey... keys)
     {
         this(name, Arrays.asList(keys));
     }
 
-    public TextSchema(String name)
+    public RowSchema(String name)
     {
         this(name, new ArrayList<ColumnKey>());
     }
 
-    public TextSchema(String name, TextSchema schema)
+    public RowSchema(String name, RowSchema schema)
     {
         this.name = name;
         //intentionally does not copy newColumnMap
@@ -135,7 +146,7 @@ public class TextSchema implements WritableComparable
 
     public int compareTo(Object o)
     {
-        TextSchema thing = (TextSchema) o;
+        RowSchema thing = (RowSchema) o;
         int diff = Integer.signum(hashCode() - thing.hashCode());
 
         if (diff == 0 && !equals(o)) {
@@ -152,9 +163,9 @@ public class TextSchema implements WritableComparable
 
     public boolean equals(Object o)
     {
-        return o == this || o instanceof TextSchema &&
-            columnMap.equals(((TextSchema) o).columnMap) &&
-            newColumnMap.equals(((TextSchema) o).newColumnMap);
+        return o == this || o instanceof RowSchema &&
+            columnMap.equals(((RowSchema) o).columnMap) &&
+            newColumnMap.equals(((RowSchema) o).newColumnMap);
     }
 
     public String toString()

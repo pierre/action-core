@@ -16,8 +16,8 @@
 
 package com.ning.metrics.action.hdfs.data.transformer;
 
-import com.ning.metrics.action.hdfs.data.key.ColumnKey;
-import com.ning.metrics.action.hdfs.data.key.DynamicColumnKey;
+import com.ning.metrics.action.hdfs.data.schema.ColumnKey;
+import com.ning.metrics.action.hdfs.data.schema.DynamicColumnKey;
 import com.ning.metrics.action.hdfs.data.Row;
 
 public class IdentityColumnKeyTransformer implements ColumnKeyTransformer
