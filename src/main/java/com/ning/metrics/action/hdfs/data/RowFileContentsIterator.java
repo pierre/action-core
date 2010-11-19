@@ -107,7 +107,7 @@ public class RowFileContentsIterator implements Iterator<Row>, Closeable
                 Row row = null;
 
                 if (key != null) {
-                    log.info(String.format("Read object [%s]", key));
+                    log.debug(String.format("Read object [%s]", key));
 
                     Object value = reader.getCurrentValue((Object) null);
 
