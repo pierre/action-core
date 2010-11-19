@@ -16,16 +16,16 @@
 
 package com.ning.metrics.action.hdfs.data.parser;
 
+import com.ning.metrics.action.hdfs.data.Row;
+import com.ning.metrics.action.hdfs.data.RowAccessException;
 import com.ning.metrics.action.hdfs.data.schema.ColumnKey;
 import com.ning.metrics.action.hdfs.data.schema.DynamicColumnKey;
 import com.ning.metrics.action.hdfs.data.schema.RowSchema;
-import com.ning.metrics.action.hdfs.data.Row;
-import com.ning.metrics.action.hdfs.data.RowAccessException;
 import com.ning.metrics.action.schema.Registrar;
-import com.ning.serialization.SchemaField;
-import com.ning.serialization.ThriftEnvelope;
-import com.ning.serialization.ThriftField;
-import org.apache.hadoop.io.Writable;
+import com.ning.metrics.goodwill.access.GoodwillSchemaField;
+import com.ning.metrics.serialization.thrift.ThriftEnvelope;
+import com.ning.metrics.serialization.thrift.ThriftField;
+import com.ning.metrics.serialization.thrift.item.DataItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,14 +45,14 @@ public class ThriftEnvelopeRowSerializer implements RowSerializer
         ThriftEnvelope envelope = (ThriftEnvelope) value;
 
         List<ThriftField> payload = envelope.getPayload();
-        List<Writable> data = new ArrayList<Writable>(payload.size());
+        List<DataItem> data = new ArrayList<DataItem>(payload.size());
         List<ColumnKey> columnKeyList = new ArrayList<ColumnKey>(payload.size());
 
 
-        Map<Short, SchemaField> schema = r.getSchema(envelope.getTypeName());
+        Map<Short, GoodwillSchemaField> schema = r.getSchema(envelope.getTypeName());
 
         for (ThriftField field : payload) {
-            SchemaField schemaField = null;
+            GoodwillSchemaField schemaField = null;
             if (schema != null) {
                 schemaField = schema.get(field.getId());
             }

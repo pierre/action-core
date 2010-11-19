@@ -16,7 +16,7 @@
 
 package com.ning.metrics.action.schema;
 
-import com.ning.serialization.SchemaField;
+import com.ning.metrics.goodwill.access.GoodwillSchemaField;
 
 import java.util.Collection;
 import java.util.Map;
@@ -27,6 +27,6 @@ public interface Registrar
 
     public Collection<String> getAllTypes();
 
-    public Map<Short, SchemaField> getSchema(String type);
+    public Map<Short, GoodwillSchemaField> getSchema(String type);
 }
 

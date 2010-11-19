@@ -20,7 +20,7 @@ import com.ning.metrics.action.hdfs.data.schema.DynamicColumnKey;
 import com.ning.metrics.action.hdfs.data.parser.RowParser;
 import com.ning.metrics.action.hdfs.data.schema.RowSchema;
 import com.ning.metrics.action.schema.Registrar;
-import com.ning.serialization.StringDataItem;
+import com.ning.metrics.serialization.thrift.item.DataItemFactory;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.log4j.Logger;
 
@@ -113,7 +113,7 @@ public class RowFileContentsIterator implements Iterator<Row>, Closeable
 
                     if (renderAsRow) {
                         row = new Row(new RowSchema("ad-hoc"));
-                        row.addCol(new DynamicColumnKey("record"), new StringDataItem(value.toString()));
+                        row.addCol(new DynamicColumnKey("record"), DataItemFactory.create(value.toString()));
                     }
                     else {
                         row = rowParser.valueToRow(registrar, value);

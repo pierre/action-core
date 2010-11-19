@@ -17,204 +17,112 @@
 package com.ning.metrics.action.schema;
 
 import com.google.inject.Inject;
-import com.ning.http.client.AsyncCompletionHandler;
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.Response;
 import com.ning.metrics.action.binder.config.ActionCoreConfig;
-import com.ning.serialization.SchemaField;
-import com.ning.serialization.SchemaFieldType;
-import org.apache.log4j.Logger;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.ning.metrics.goodwill.access.GoodwillAccessor;
+import com.ning.metrics.goodwill.access.GoodwillSchema;
+import com.ning.metrics.goodwill.access.GoodwillSchemaField;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 public class GoodwillRegistrar implements Registrar
 {
-    private static final Logger log = Logger.getLogger(GoodwillRegistrar.class);
-
-    private volatile Map<String, String> canonicalMap = new HashMap<String, String>();
-    private final ConcurrentMap<String, Map<Short, SchemaField>> schemaCache = new ConcurrentHashMap<String, Map<Short, SchemaField>>();
-    private final String host;
-    private final int port;
-    private final AsyncHttpClient client;
-    private final SchemaSerializer schemaSerializer;
+    private final GoodwillAccessor goodwillAccessor;
 
     @Inject
     public GoodwillRegistrar(
         ActionCoreConfig config
     ) throws IOException, ExecutionException, InterruptedException
     {
-        this.host = config.getRegistrarHost();
-        this.port = config.getRegistrarPort();
-        File stateFile = new File(config.getRegistrarStateFile());
-        this.client = new AsyncHttpClient();
-        this.schemaSerializer = new SchemaSerializer(stateFile);
+        String host = config.getRegistrarHost();
+        int port = config.getRegistrarPort();
 
-        try {
-            this.schemaCache.putAll(this.schemaSerializer.loadState());
-        }
-        catch (SchemaSerializerException e) {
-            log.warn(String.format("Failed to load state from %s", stateFile), e);
-        }
-
-        for (String type : schemaCache.keySet()) {
-            canonicalMap.put(type.toLowerCase(), type);
-        }
+        goodwillAccessor = new GoodwillAccessor(host, port);
     }
 
+    @Override
     public String getCanonicalName(String type)
     {
-        if (!updateCanonicalMap()) {
-            log.info(String.format("Unable to update canonical map. Schema for type %s may be stale", type));
-        }
+        try {
+            Future<GoodwillSchema> schemaFuture = goodwillAccessor.getSchema(type);
+            // IOException
+            if (schemaFuture == null) {
+                return null;
+            }
 
-        return canonicalMap.get(type.toLowerCase());
+            GoodwillSchema goodwillSchema = schemaFuture.get();
+            if (goodwillSchema != null) {
+                return goodwillSchema.getName();
+            }
+            else {
+                return null;
+            }
+        }
+        catch (InterruptedException e) {
+            throw new RuntimeException(String.format("Was interrupted while getting schema: %s", type), e);
+        }
+        catch (ExecutionException e) {
+            throw new RuntimeException(String.format("Problem getting schema: %s", type), e);
+        }
     }
 
+    @Override
     public Collection<String> getAllTypes()
     {
-        updateCanonicalMap();
-
-        return Collections.unmodifiableCollection(canonicalMap.values());
-    }
-
-    private boolean updateCanonicalMap()
-    {
-        boolean updatedSuccessfully = false;
+        Collection<String> result = new ArrayList<String>();
 
         try {
-            String url = String.format("http://%s:%d/goodwill/registrar", host, port);
+            Future<List<GoodwillSchema>> schemataFuture = goodwillAccessor.getSchemata();
+            // IOException
+            if (schemataFuture == null) {
+                return null;
+            }
 
-            final Map<String, String> typeMap = new HashMap<String, String>();
-
-            client.prepareGet(url).addHeader("Accept", "application/json").execute(new AsyncCompletionHandler<Response>()
-            {
-
-                @Override
-                public Response onCompleted(Response response) throws Exception
-                {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(response.getResponseBodyAsStream()));
-                    ObjectMapper mapper = new ObjectMapper();
-                    for (Object o : mapper.readValue(reader, ArrayList.class)) {
-                        try {
-                            HashMap type = (HashMap) o;
-                            String typeName = (String) type.get("name");
-                            typeMap.put(typeName.toLowerCase(), typeName);
-                        }
-                        catch (RuntimeException e) {
-                            log.warn("Unexpected exception while communicating with the Goodwill server", e);
-                        }
-                    }
-                    reader.close();
-
-                    return response;
-                }
-
-                @Override
-                public void onThrowable(Throwable t)
-                {
-                    log.warn(t);
-                }
-            });
-
-            if (!typeMap.isEmpty()) {
-                canonicalMap = typeMap;
-                updatedSuccessfully = true;
+            List<GoodwillSchema> goodwillSchemata = schemataFuture.get();
+            for (GoodwillSchema goodwillSchema : goodwillSchemata) {
+                result.add(goodwillSchema.getName());
             }
         }
-        catch (IOException e) {
-            log.warn(String.format("Error updating canonical map from %s:%d", host, port));
+        catch (InterruptedException e) {
+            throw new RuntimeException("Was interrupted while getting the list of schemata", e);
         }
-        finally {
-            if (!updatedSuccessfully) {
-                log.info("unable to update canonical map");
-            }
+        catch (ExecutionException e) {
+            throw new RuntimeException("Problem getting the list of schemata", e);
         }
 
-        return updatedSuccessfully;
+        return result;
     }
 
-    public Map<Short, SchemaField> getSchema(String type)
+    @Override
+    public Map<Short, GoodwillSchemaField> getSchema(String type)
     {
-        String url = String.format("http://%s:%d/goodwill/registrar/%s", host, port, type);
-        String canonicalType = canonicalMap.get(type.toLowerCase());
-
-        if (canonicalType == null) {
-            updateCanonicalMap();
-            canonicalType = canonicalMap.get(type.toLowerCase());
-
-            if (canonicalType == null) {
-                log.info(String.format("unable to get canonical type for %s", type));
-                canonicalType = type;
-            }
-        }
+        Map<Short, GoodwillSchemaField> result = new HashMap<Short, GoodwillSchemaField>();
 
         try {
-            final Map<Short, SchemaField> schemaFieldMap = new LinkedHashMap<Short, SchemaField>();
+            Future<GoodwillSchema> schemaFuture = goodwillAccessor.getSchema(type);
+            // IOException
+            if (schemaFuture == null) {
+                return null;
+            }
 
-            client.prepareGet(url).addHeader("Accept", "application/json").execute(new AsyncCompletionHandler<Response>()
-            {
-                @Override
-                public Response onCompleted(Response response) throws Exception
-                {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(response.getResponseBodyAsStream()));
-                    ObjectMapper mapper = new ObjectMapper();
-                    HashMap map = mapper.readValue(reader, HashMap.class);
-                    try {
-                        for (Object o : (ArrayList) map.get("schema")) {
-                            HashMap field = (HashMap) o;
-                            SchemaField schemaField = SchemaFieldType.createSchemaField((String) field.get("name"), (String) field.get("type"), ((Integer) field.get("position")).shortValue());
-                            schemaFieldMap.put((short) schemaField.getId(), schemaField);
-
-                        }
-                    }
-                    catch (RuntimeException e) {
-                        log.warn("Unexpected exception while communicating with the Goodwill server", e);
-                    }
-
-                    reader.close();
-
-                    return response;
-                }
-
-                @Override
-                public void onThrowable(Throwable t)
-                {
-                    log.warn(t);
-                }
-            });
-
-            if (!schemaFieldMap.isEmpty()) {
-                schemaCache.put(canonicalType, Collections.unmodifiableMap(schemaFieldMap));
-
-                if (schemaSerializer != null) {
-                    try {
-                        schemaSerializer.saveState(schemaCache);
-                    }
-                    catch (SchemaSerializerException e) {
-                        log.warn(String.format("Failed to save state to %s", schemaSerializer), e);
-                    }
-                }
+            GoodwillSchema goodwillSchema = schemaFuture.get();
+            for (GoodwillSchemaField goodwillField : goodwillSchema.getSchema()) {
+                result.put(goodwillField.getId(), goodwillField);
             }
         }
-        catch (IOException e) {
-            log.warn(String.format("Unable to contact type registrar at host %s, port %d.  Using cached schema for type %s", host, port, type), e);
+        catch (InterruptedException e) {
+            throw new RuntimeException(String.format("Was interrupted while getting schema: %s", type), e);
+        }
+        catch (ExecutionException e) {
+            throw new RuntimeException(String.format("Problem getting schema: %s", type), e);
         }
 
-        Map<Short, SchemaField> result = schemaCache.get(canonicalType);
-
-        return result == null ? null : Collections.unmodifiableMap(result);
+        return result;
     }
 }

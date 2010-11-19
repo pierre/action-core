@@ -16,14 +16,14 @@
 
 package com.ning.metrics.action.hdfs.data.parser;
 
+import com.ning.metrics.action.hdfs.data.Row;
+import com.ning.metrics.action.hdfs.data.RowAccessException;
 import com.ning.metrics.action.hdfs.data.schema.ColumnKey;
 import com.ning.metrics.action.hdfs.data.schema.DynamicColumnKey;
 import com.ning.metrics.action.hdfs.data.schema.RowSchema;
-import com.ning.metrics.action.hdfs.data.Row;
-import com.ning.metrics.action.hdfs.data.RowAccessException;
 import com.ning.metrics.action.schema.Registrar;
-import com.ning.serialization.DataItem;
-import com.ning.serialization.StringDataItem;
+import com.ning.metrics.serialization.thrift.item.DataItem;
+import com.ning.metrics.serialization.thrift.item.DataItemFactory;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 
@@ -50,7 +50,7 @@ public class WritableRowSerializer implements RowSerializer
 
             for (int i = 0; i < data.length; i++) {
                 columnKeyList.add(new DynamicColumnKey(String.valueOf("col-" + i)));
-                items[i] = new StringDataItem(data[i]);
+                items[i] = DataItemFactory.create(data[i]);
             }
 
             row = new Row(new RowSchema("Text", columnKeyList), items);
