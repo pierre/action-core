@@ -36,14 +36,12 @@ public class HdfsListing
     private final ImmutableList<HdfsEntry> entries;
     private final boolean recursive;
     private final boolean raw;
-    private final FileSystem fs;
     private final RowFileContentsIteratorFactory rowFileContentsIteratorFactory;
 
     public HdfsListing(FileSystem fileSystem, Path path, boolean raw, RowFileContentsIteratorFactory rowFileContentsIteratorFactory, String type, boolean recursive) throws IOException
     {
-        this.fs = fileSystem;
         this.path = path;
-        this.parentPath = "/".equals(this.path) ? null : path.getParent().toUri().toString();
+        this.parentPath = "/".equals(path.toUri().toString()) ? null : path.getParent().toUri().toString();
         this.raw = raw;
         this.recursive = recursive;
         this.rowFileContentsIteratorFactory = rowFileContentsIteratorFactory;
