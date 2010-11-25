@@ -77,7 +77,7 @@ public class HdfsReaderEndPoint
      * @param type
      * @param raw
      * @param recursive
-     * @return
+     * @return HdfsListing containing entries in the directory
      * @throws java.io.IOException
      */
     public HdfsListing getListing(String path, String type, boolean raw, boolean recursive) throws IOException
