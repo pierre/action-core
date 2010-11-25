@@ -36,7 +36,7 @@ import java.util.Map;
  * A column is defined via the ColumnKey interface. By default, the DynamicColumnKey
  * class is used but you can implement your own if special handling is needed.
  *
- * @todo Runtime discovery of custom ColumnKey
+ * TODO Runtime discovery of custom ColumnKey
  * @see com.ning.metrics.action.hdfs.data.Row
  * @see ColumnKey
  */
