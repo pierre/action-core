@@ -46,7 +46,7 @@
                 <th>Name</th>
                 <th>Modification Time</th>
                 <th>Size</th>
-                <th>Replication size</th>
+                <th>Replication</th>
             </tr>
             <% if (it.getParentPath() != null) { %>
             <tr>
@@ -55,7 +55,7 @@
             </tr>
             <% } %>
             <tr>
-                <td><a href="?path=<%= it.getPath() %>&amp;type=json">JSON listing</a></td>
+                <td><a href="?path=<%= it.getPath() %>&amp;type=json">JSON listing</a> (<a href="?path=<%= it.getPath() %>&amp;type=json&pretty=true">pretty</a>)</td>
                 <td colspan="3"></td>
             </tr>
             <tr>
@@ -83,9 +83,9 @@
                 </td>
                 <td><%= e.getModificationDate() %>
                 </td>
-                <td class="size"><%= e.getSize() %>
+                <td class="size"><%= e.getPrettySize() %>
                 </td>
-                <td class="size"><%= e.getReplicatedSize() %>
+                <td class="size"><%= e.getReplication() %>
                 </td>
             </tr>
             <%

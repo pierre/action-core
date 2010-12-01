@@ -82,7 +82,7 @@
             <tr>
                 <td>
                     <% Row currentContent = content.next(); %>
-                    <a id="row_<%= currentLine %>" href="action/viewer?object=<%= URLEncoder.encode(new String(Base64.encodeBase64(currentContent.toJSON().getBytes())), "UTF-8") %>" target="_blank">
+                    <a id="row_<%= currentLine %>" href="/rest/1.0/viewer?object=<%= URLEncoder.encode(new String(Base64.encodeBase64(currentContent.toJSON().getBytes())), "UTF-8") %>" target="_blank">
                         <%= currentContent.toString() %>
                     </a>
                 </td>

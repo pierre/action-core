@@ -16,14 +16,19 @@
 
 package com.ning.metrics.action.hdfs.reader;
 
+import com.google.common.collect.ImmutableMap;
 import com.ning.metrics.action.hdfs.data.RowFileContentsIterator;
 import com.ning.metrics.action.hdfs.data.RowFileContentsIteratorFactory;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonValue;
 import org.joda.time.DateTime;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 
 /**
  * Summarizes information about HDFS files and directories in a Hadoop-agnostic way.
@@ -31,7 +36,9 @@ import java.io.IOException;
 public class HdfsEntry
 {
     private final Path path;
+    private final long blockSize;
     private final long size;
+    private final short replication;
     private final long replicatedSize;
     private final DateTime modificationDate;
     private final boolean directory;
@@ -39,22 +46,50 @@ public class HdfsEntry
     private final boolean raw;
     private final RowFileContentsIteratorFactory rowFileContentsIteratorFactory;
 
+    private static final String[] SIZES = {"B", "KB", "MB", "GB", "TB", "PB"};
+
+    public static final String JSON_ENTRY_PATH = "path";
+    public static final String JSON_ENTRY_MTIME = "mtime";
+    public static final String JSON_ENTRY_SIZE = "size";
+    public static final String JSON_ENTRY_REPLICATION = "replication";
+    public static final String JSON_ENTRY_IS_DIR = "isDir";
+    public static final String JSON_ENTRY_CONTENT = "content";
+
+    @JsonCreator
+    @SuppressWarnings("unused")
+    public HdfsEntry(
+        @JsonProperty(JSON_ENTRY_PATH) String path,
+        @JsonProperty(JSON_ENTRY_MTIME) long mtime,
+        @JsonProperty(JSON_ENTRY_SIZE) long sizeInBytes,
+        @JsonProperty(JSON_ENTRY_REPLICATION) short replication,
+        @JsonProperty(JSON_ENTRY_IS_DIR) boolean isDirectory
+    )
+    {
+        this.fs = null;
+        this.path = new Path(path);
+        this.modificationDate = new DateTime(mtime);
+        this.blockSize = -1;
+        this.size = sizeInBytes;
+        this.replication = replication;
+        this.replicatedSize = sizeInBytes * replication;
+        this.directory = isDirectory;
+
+        this.raw = true;
+        this.rowFileContentsIteratorFactory = null;
+    }
+
     public HdfsEntry(FileSystem fs, FileStatus status, boolean raw, RowFileContentsIteratorFactory rowFileContentsIteratorFactory) throws IOException
     {
         this.fs = fs;
         this.path = status.getPath();
         this.modificationDate = new DateTime(status.getModificationTime());
 
-        if (status.isDir()) {
-            this.size = 0;
-            this.replicatedSize = 0;
-            this.directory = true;
-        }
-        else {
-            this.size = status.getLen();
-            this.replicatedSize = status.getReplication() * status.getLen();
-            this.directory = false;
-        }
+        this.blockSize = status.getBlockSize();
+        this.size = status.getLen();
+        this.replication = status.getReplication();
+        this.replicatedSize = status.getReplication() * status.getLen();
+
+        this.directory = status.isDir();
 
         this.raw = raw;
         this.rowFileContentsIteratorFactory = rowFileContentsIteratorFactory;
@@ -65,9 +100,42 @@ public class HdfsEntry
         return path.toUri().getPath();
     }
 
+    /**
+     * Get the length of the file, in bytes
+     *
+     * @return the length of this file, in bytes
+     */
     public long getSize()
     {
         return size;
+    }
+
+    /**
+     * Pretty print the size of the file
+     *
+     * @return a string representing the size of the file
+     */
+    public String getPrettySize()
+    {
+        DecimalFormat format = new DecimalFormat();
+        long sizeInBytes = size;
+        int i = 0;
+
+        while (sizeInBytes > 1023 && i < SIZES.length - 1) {
+            sizeInBytes /= 1024;
+            i += 1;
+        }
+
+        if (sizeInBytes < 10) {
+            format.setMaximumFractionDigits(1);
+        }
+
+        return format.format(size) + " " + SIZES[i];
+    }
+
+    public short getReplication()
+    {
+        return replication;
     }
 
     public long getReplicatedSize()
@@ -88,6 +156,27 @@ public class HdfsEntry
     public RowFileContentsIterator getContent() throws IOException
     {
         return rowFileContentsIteratorFactory.build(fs, path, raw);
+    }
+
+    @JsonValue
+    @SuppressWarnings({"unchecked", "unused"})
+    public ImmutableMap toMap()
+    {
+        RowFileContentsIterator content = null;
+        try {
+            content = getContent();
+        }
+        catch (IOException ignored) {
+        }
+
+        return new ImmutableMap.Builder()
+            .put(JSON_ENTRY_PATH, getPath())
+            .put(JSON_ENTRY_MTIME, getModificationDate().getMillis())
+            .put(JSON_ENTRY_SIZE, getSize())
+            .put(JSON_ENTRY_REPLICATION, getReplication())
+            .put(JSON_ENTRY_IS_DIR, isDirectory())
+            .put(JSON_ENTRY_CONTENT, content)
+            .build();
     }
 
     @Override

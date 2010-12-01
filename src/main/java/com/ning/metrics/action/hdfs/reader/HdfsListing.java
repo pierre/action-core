@@ -17,12 +17,17 @@
 package com.ning.metrics.action.hdfs.reader;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.ning.metrics.action.hdfs.data.RowFileContentsIteratorFactory;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonValue;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Container for list of {@link HdfsEntry}.
@@ -37,6 +42,27 @@ public class HdfsListing
     private final boolean recursive;
     private final boolean raw;
     private final RowFileContentsIteratorFactory rowFileContentsIteratorFactory;
+
+    public static final String JSON_LISTING_PATH = "path";
+    public static final String JSON_LISTING_PARENT_PATH = "parentPath";
+    public static final String JSON_LISTING_ENTRIES = "entries";
+
+    @JsonCreator
+    @SuppressWarnings("unused")
+    public HdfsListing(
+        @JsonProperty(JSON_LISTING_PATH) String path,
+        @JsonProperty(JSON_LISTING_PARENT_PATH) String parentPath,
+        @JsonProperty(JSON_LISTING_ENTRIES) List<HdfsEntry> entries
+    )
+    {
+        this.path = new Path(path);
+        this.parentPath = parentPath;
+        this.entries = ImmutableList.copyOf(entries);
+
+        raw = true;
+        recursive = false;
+        rowFileContentsIteratorFactory = null;
+    }
 
     public HdfsListing(FileSystem fileSystem, Path path, boolean raw, RowFileContentsIteratorFactory rowFileContentsIteratorFactory, String type, boolean recursive) throws IOException
     {
@@ -90,6 +116,17 @@ public class HdfsListing
     public ImmutableList<HdfsEntry> getEntries()
     {
         return entries;
+    }
+
+    @JsonValue
+    @SuppressWarnings({"unchecked", "unused"})
+    public ImmutableMap toMap()
+    {
+        return new ImmutableMap.Builder()
+            .put(JSON_LISTING_PATH, getPath())
+            .put(JSON_LISTING_PARENT_PATH, getParentPath())
+            .put(JSON_LISTING_ENTRIES, getEntries())
+            .build();
     }
 
     @Override

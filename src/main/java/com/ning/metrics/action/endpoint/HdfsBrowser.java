@@ -17,6 +17,7 @@
 package com.ning.metrics.action.endpoint;
 
 import com.google.inject.Inject;
+import com.ning.metrics.action.hdfs.reader.HdfsListing;
 import com.ning.metrics.action.hdfs.reader.HdfsReaderEndPoint;
 import com.sun.jersey.api.view.Viewable;
 import org.apache.commons.codec.binary.Base64;
@@ -28,6 +29,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -86,6 +89,29 @@ public class HdfsBrowser
                 return new Viewable("/rest/content.jsp", hdfsReader.getListing(path, type, raw, recursive));
             }
         }
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/json")
+    public Response dirToJson(
+        @QueryParam("path") String path,
+        @QueryParam("pretty") boolean pretty
+    ) throws IOException
+    {
+        final HdfsListing hdfsListing = hdfsReader.getListing(path);
+
+        if (pretty) {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            mapper.writeValue(out, hdfsListing.toMap());
+
+            return Response.ok().entity(new String(out.toByteArray())).build();
+        }
+
+        return Response.ok().entity(hdfsListing).build();
     }
 
     @GET

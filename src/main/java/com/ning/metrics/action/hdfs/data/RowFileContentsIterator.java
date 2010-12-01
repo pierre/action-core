@@ -16,17 +16,23 @@
 
 package com.ning.metrics.action.hdfs.data;
 
-import com.ning.metrics.action.hdfs.data.schema.DynamicColumnKey;
+import com.google.common.collect.ImmutableMap;
 import com.ning.metrics.action.hdfs.data.parser.RowParser;
+import com.ning.metrics.action.hdfs.data.schema.DynamicColumnKey;
 import com.ning.metrics.action.hdfs.data.schema.RowSchema;
 import com.ning.metrics.action.schema.Registrar;
 import com.ning.metrics.serialization.thrift.item.DataItemFactory;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonValue;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 public class RowFileContentsIterator implements Iterator<Row>, Closeable
@@ -40,6 +46,19 @@ public class RowFileContentsIterator implements Iterator<Row>, Closeable
     private Row row;
     private boolean readerClosed = false;
     private final Registrar registrar;
+
+    public static final String JSON_CONTENT_PATH = "path";
+    public static final String JSON_CONTENT_ENTRIES = "entries";
+
+    @JsonCreator
+    @SuppressWarnings("unused")
+    public RowFileContentsIterator(
+        @JsonProperty(JSON_CONTENT_PATH) String path,
+        @JsonProperty(JSON_CONTENT_ENTRIES) List<Row> entries
+    )
+    {
+        this(path, null, null, null, true);
+    }
 
     public RowFileContentsIterator(String pathname, RowParser rowParser, Registrar registrar, SequenceFile.Reader reader, boolean rawContents)
     {
@@ -133,5 +152,21 @@ public class RowFileContentsIterator implements Iterator<Row>, Closeable
 
             return null;
         }
+    }
+
+    @JsonValue
+    @SuppressWarnings({"unchecked", "unused"})
+    public ImmutableMap toMap()
+    {
+        ArrayList<Row> rows = new ArrayList<Row>();
+
+        while (hasNext()) {
+            rows.add(next());
+        }
+
+        return new ImmutableMap.Builder()
+            .put(JSON_CONTENT_PATH, pathname)
+            .put(JSON_CONTENT_ENTRIES, rows)
+            .build();
     }
 }

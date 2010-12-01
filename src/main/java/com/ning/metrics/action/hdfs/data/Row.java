@@ -16,15 +16,20 @@
 
 package com.ning.metrics.action.hdfs.data;
 
+import com.google.common.collect.ImmutableMap;
 import com.ning.metrics.action.hdfs.data.schema.ColumnKey;
 import com.ning.metrics.action.hdfs.data.schema.RowSchema;
 import com.ning.metrics.action.hdfs.data.transformer.ColumnKeyTransformer;
 import com.ning.metrics.serialization.thrift.item.DataItem;
 import com.ning.metrics.serialization.thrift.item.DataItemDeserializer;
+import com.ning.metrics.serialization.thrift.item.DataItemFactory;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableUtils;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonValue;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -47,7 +52,25 @@ public class Row implements WritableComparable
     private final RowSchema schema;
     private List<DataItem> data;
 
+    public static final String JSON_ROW_ENTRIES = "entries";
+
+    @JsonCreator
+    @SuppressWarnings("unused")
+    public Row(
+        @JsonProperty(JSON_ROW_ENTRIES) List<String> entries
+    )
+    {
+        this.schema = null;
+
+        ArrayList<DataItem> items = new ArrayList<DataItem>();
+        for (String e : entries) {
+            items.add(DataItemFactory.create(e));
+        }
+        this.data = items;
+    }
+
     // TODO: consider doing a value-copy of RowSchema to ensure each row has its own copy
+
     public Row(RowSchema schema, List<DataItem> data)
     {
         this.schema = schema;
@@ -209,5 +232,20 @@ public class Row implements WritableComparable
     public boolean equals(Object o)
     {
         return this == o || o != null && o instanceof Row && data.equals(((Row) o).data) && schema.equals(((Row) o).schema);
+    }
+
+    @JsonValue
+    @SuppressWarnings({"unchecked", "unused"})
+    public ImmutableMap toMap()
+    {
+        ArrayList<String> rows = new ArrayList<String>();
+
+        for (DataItem item : data) {
+            rows.add(item.getString());
+        }
+
+        return new ImmutableMap.Builder()
+            .put(JSON_ROW_ENTRIES, rows)
+            .build();
     }
 }
