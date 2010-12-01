@@ -33,14 +33,14 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.LinkedHashMap;
 
-@Path("action")
-public class Action
+@Path("/rest/1.0")
+public class HdfsBrowser
 {
     private HdfsReaderEndPoint hdfsReader;
-    private org.apache.log4j.Logger log = Logger.getLogger(Action.class);
+    private Logger log = Logger.getLogger(HdfsBrowser.class);
 
     @Inject
-    public Action(
+    public HdfsBrowser(
         HdfsReaderEndPoint store
     )
     {
@@ -59,6 +59,7 @@ public class Action
      * @throws IOException HDFS crawling error
      */
     @GET
+    @Path("/hdfs")
     @Produces({"text/html", "text/plain"})
     public Viewable getListing(
         @QueryParam("path") String path,
@@ -75,14 +76,14 @@ public class Action
         }
 
         if (hdfsReader.isDir(path) && !recursive) {
-            return new Viewable("/hdfs/listing.jsp", hdfsReader.getListing(path));
+            return new Viewable("/rest/listing.jsp", hdfsReader.getListing(path));
         }
         else {
             if (raw) {
-                return new Viewable("/hdfs/contentRaw.jsp", hdfsReader.getListing(path, type, raw, recursive));
+                return new Viewable("/rest/contentRaw.jsp", hdfsReader.getListing(path, type, raw, recursive));
             }
             else {
-                return new Viewable("/hdfs/content.jsp", hdfsReader.getListing(path, type, raw, recursive));
+                return new Viewable("/rest/content.jsp", hdfsReader.getListing(path, type, raw, recursive));
             }
         }
     }
@@ -105,7 +106,6 @@ public class Action
         // We need to re-serialize the json (pretty print works only on serialization)
         mapper.writeValue(out, map);
 
-        return new Viewable("/hdfs/contentJSON.jsp", new String(out.toByteArray()));
+        return new Viewable("/rest/contentJSON.jsp", new String(out.toByteArray()));
     }
 }
-

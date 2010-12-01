@@ -25,13 +25,18 @@
     </appender>
 
     <logger name="com.ning.metrics">
-        <level value="debug"/>
+        <level value="info"/>
     </logger>
+
     <logger name="org.apache.jasper">
         <level value="info"/>
     </logger>
+    <logger name="org.mortbay.log">
+        <level value="info"/>
+    </logger>
+
     <root>
-        <level value="debug"/>
+        <level value="info"/>
         <appender-ref ref="CONSOLE"/>
     </root>
 </log4j:configuration>

@@ -22,8 +22,8 @@
 <head>
     <meta http-equiv="Content-type" content="text/html; charset=utf-8">
     <title>HDFS on JSP</title>
-    <script type="text/javascript" src="/metrics.action/js/jquery-1.3.2.min.js"></script>
-    <link rel="stylesheet" href="/metrics.action/css/global.css" type="text/css">
+    <script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+    <link rel="stylesheet" href="/static/css/global.css" type="text/css">
 </head>
 <body>
 
