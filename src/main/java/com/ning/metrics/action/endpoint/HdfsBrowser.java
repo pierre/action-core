@@ -54,7 +54,6 @@ public class HdfsBrowser
      * Build a Viewable to browse HDFS.
      *
      * @param path      path in HDFS to render (directory listing or file), defaults to /
-     * @param type      optional, serialization type (avrojson, avrodata, thrift, text)
      * @param range     optional, bucket of lines to read (e.g. 200-250) (used in the content.jsp only)
      * @param raw       optional, whether to try to deserialize
      * @param recursive optional, whether to crawl all files under a directory
@@ -66,13 +65,12 @@ public class HdfsBrowser
     @Produces({"text/html", "text/plain"})
     public Viewable getListing(
         @QueryParam("path") String path,
-        @QueryParam("type") String type,
         @QueryParam("range") String range,
         @QueryParam("raw") boolean raw,
         @QueryParam("recursive") boolean recursive
     ) throws IOException
     {
-        log.debug(String.format("Got request for path=[%s], type=[%s], raw=[%s] and recursive=[%s]", path, type, raw, recursive));
+        log.debug(String.format("Got request for path=[%s], raw=[%s] and recursive=[%s]", path, raw, recursive));
 
         if (path == null) {
             path = "/";
@@ -83,10 +81,10 @@ public class HdfsBrowser
         }
         else {
             if (raw) {
-                return new Viewable("/rest/contentRaw.jsp", hdfsReader.getListing(path, type, raw, recursive));
+                return new Viewable("/rest/contentRaw.jsp", hdfsReader.getListing(path, raw, recursive));
             }
             else {
-                return new Viewable("/rest/content.jsp", hdfsReader.getListing(path, type, raw, recursive));
+                return new Viewable("/rest/content.jsp", hdfsReader.getListing(path, raw, recursive));
             }
         }
     }
@@ -94,12 +92,13 @@ public class HdfsBrowser
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/json")
-    public Response dirToJson(
+    public Response listingToJson(
         @QueryParam("path") String path,
+        @QueryParam("recursive") boolean recursive,
         @QueryParam("pretty") boolean pretty
     ) throws IOException
     {
-        final HdfsListing hdfsListing = hdfsReader.getListing(path);
+        final HdfsListing hdfsListing = hdfsReader.getListing(path, true, recursive);
 
         if (pretty) {
             ObjectMapper mapper = new ObjectMapper();
@@ -115,11 +114,24 @@ public class HdfsBrowser
     }
 
     @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("/text")
+    public Viewable dirToJson(
+        @QueryParam("path") String path,
+        @QueryParam("recursive") boolean recursive
+    ) throws IOException
+    {
+        return new Viewable("/rest/contentRaw.jsp", hdfsReader.getListing(path, true, recursive));
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/viewer")
-    @Produces("text/plain")
-    public Viewable prettyPrintOneLine(
+    public Response prettyPrintOneLine(
         @QueryParam("object") String object) throws IOException
     {
+        // TODO: retrieve the goodwill schema to output properly the json payload (respect integers, ...)
+
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ObjectMapper mapper = new ObjectMapper();
 
@@ -132,6 +144,6 @@ public class HdfsBrowser
         // We need to re-serialize the json (pretty print works only on serialization)
         mapper.writeValue(out, map);
 
-        return new Viewable("/rest/contentJSON.jsp", new String(out.toByteArray()));
+        return Response.ok().entity(new String(out.toByteArray())).build();
     }
 }

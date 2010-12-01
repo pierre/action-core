@@ -43,6 +43,9 @@ int currentLine = 1;
 
 for (int i = 0; i < it.getEntries().size(); i++) {
     HdfsEntry e = it.getEntries().get(i);
+    if (e.isDirectory()) {
+        continue;
+    }
     RowFileContentsIterator content = e.getContent();
     while (content.hasNext()) { if (currentLine >= startLine && (currentLine <= endLine || endLine == -1)) {%><%= content.next().toString() %>
 <%  } else { content.next(); } currentLine++; if (endLine != -1 && endLine < currentLine) { break; } } } %>

@@ -67,21 +67,20 @@ public class HdfsReaderEndPoint
      */
     public HdfsListing getListing(String dir) throws IOException
     {
-        return getListing(dir, null, false, false);
+        return getListing(dir, false, false);
     }
 
     /**
      * Return content in a directory/file, possibly recursively.
      *
      * @param path
-     * @param type
      * @param raw
      * @param recursive
      * @return HdfsListing containing entries in the directory
      * @throws java.io.IOException
      */
-    public HdfsListing getListing(String path, String type, boolean raw, boolean recursive) throws IOException
+    public HdfsListing getListing(String path, boolean raw, boolean recursive) throws IOException
     {
-        return new HdfsListing(fileSystem, new Path(path), raw, rowFileContentsIteratorFactory, type, recursive);
+        return new HdfsListing(fileSystem, new Path(path), raw, rowFileContentsIteratorFactory, recursive);
     }
 }

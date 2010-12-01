@@ -175,7 +175,7 @@ public class HdfsEntry
             .put(JSON_ENTRY_SIZE, getSize())
             .put(JSON_ENTRY_REPLICATION, getReplication())
             .put(JSON_ENTRY_IS_DIR, isDirectory())
-            .put(JSON_ENTRY_CONTENT, content)
+            .put(JSON_ENTRY_CONTENT, content == null ? "" : content)
             .build();
     }
 

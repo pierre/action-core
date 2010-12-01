@@ -55,17 +55,23 @@
             </tr>
             <% } %>
             <tr>
-                <td><a href="?path=<%= it.getPath() %>&amp;type=json">JSON listing</a> (<a href="?path=<%= it.getPath() %>&amp;type=json&pretty=true">pretty</a>)</td>
+                <td><a href="/rest/1.0/json?path=<%= it.getPath() %>" target="_blank">JSON listing</a> (<a
+                        href="/rest/1.0/json?path=<%= it.getPath() %>&amp;pretty=true" target="_blank">pretty</a>)
+                </td>
                 <td colspan="3"></td>
             </tr>
             <tr>
-                <td><a href="?path=<%= it.getPath() %>&amp;type=content&amp;recursive=false">. (dir
-                    content)</a></td>
+                <td><a href="/rest/1.0/json?path=<%= it.getPath() %>&amp;recursive=true" target="_blank">Recursive JSON
+                    listing</a> (<a
+                        href="/rest/1.0/json?path=<%= it.getPath() %>&amp;recursive=true&amp;pretty=true"
+                        target="_blank">pretty</a>)
+                </td>
                 <td colspan="3"></td>
             </tr>
             <tr>
-                <td><a href="?path=<%= it.getPath() %>&amp;type=content&amp;recursive=true">. (dir + subdir
-                    content)</a></td>
+                <td><a href="/rest/1.0/text?path=<%= it.getPath() %>&amp;recursive=true" target="_blank">Recursive raw
+                    listing</a>
+                </td>
                 <td colspan="3"></td>
             </tr>
 
@@ -75,10 +81,10 @@
             %>
             <tr>
                 <td>
-                    <a href="?path=<%= e.getPath() %>&amp;type=content&amp;range=1-50"><%= e.getPath() %>
+                    <a href="?path=<%= e.getPath() %>&amp;range=1-50"><%= e.getPath() %>
                     </a>
                     <% if (!e.isDirectory()) { %>
-                        <a href="?path=<%= e.getPath() %>&amp;type=content&amp;raw=true">(raw)</a>
+                    <a href="?path=<%= e.getPath() %>&amp;raw=true">(raw)</a>
                     <% } %>
                 </td>
                 <td><%= e.getModificationDate() %>

@@ -64,7 +64,7 @@ public class HdfsListing
         rowFileContentsIteratorFactory = null;
     }
 
-    public HdfsListing(FileSystem fileSystem, Path path, boolean raw, RowFileContentsIteratorFactory rowFileContentsIteratorFactory, String type, boolean recursive) throws IOException
+    public HdfsListing(FileSystem fileSystem, Path path, boolean raw, RowFileContentsIteratorFactory rowFileContentsIteratorFactory, boolean recursive) throws IOException
     {
         this.path = path;
         this.parentPath = "/".equals(path.toUri().toString()) ? null : path.getParent().toUri().toString();
@@ -122,9 +122,10 @@ public class HdfsListing
     @SuppressWarnings({"unchecked", "unused"})
     public ImmutableMap toMap()
     {
+        final String parentPath = getParentPath() == null ? "" : getParentPath();
         return new ImmutableMap.Builder()
             .put(JSON_LISTING_PATH, getPath())
-            .put(JSON_LISTING_PARENT_PATH, getParentPath())
+            .put(JSON_LISTING_PARENT_PATH, parentPath)
             .put(JSON_LISTING_ENTRIES, getEntries())
             .build();
     }

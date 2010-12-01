@@ -112,6 +112,11 @@ public class GoodwillRegistrar implements Registrar
             }
 
             GoodwillSchema goodwillSchema = schemaFuture.get();
+            // Schema not found
+            if (goodwillSchema == null) {
+                return null;
+            }
+
             for (GoodwillSchemaField goodwillField : goodwillSchema.getSchema()) {
                 result.put(goodwillField.getId(), goodwillField);
             }
