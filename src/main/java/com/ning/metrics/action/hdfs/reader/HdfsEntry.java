@@ -17,7 +17,7 @@
 package com.ning.metrics.action.hdfs.reader;
 
 import com.google.common.collect.ImmutableMap;
-import com.ning.metrics.action.hdfs.data.RowFileContentsIterator;
+import com.ning.metrics.action.hdfs.data.Row;
 import com.ning.metrics.action.hdfs.data.RowFileContentsIteratorFactory;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -29,6 +29,7 @@ import org.joda.time.DateTime;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.Iterator;
 
 /**
  * Summarizes information about HDFS files and directories in a Hadoop-agnostic way.
@@ -153,7 +154,7 @@ public class HdfsEntry
         return directory;
     }
 
-    public RowFileContentsIterator getContent() throws IOException
+    public Iterator<Row> getContent() throws IOException
     {
         return rowFileContentsIteratorFactory.build(fs, path, raw);
     }
@@ -162,7 +163,7 @@ public class HdfsEntry
     @SuppressWarnings({"unchecked", "unused"})
     public ImmutableMap toMap()
     {
-        RowFileContentsIterator content = null;
+        Iterator<Row> content = null;
         try {
             content = getContent();
         }

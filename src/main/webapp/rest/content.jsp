@@ -1,9 +1,9 @@
 <%@ page import="com.ning.metrics.action.hdfs.data.Row" %>
-<%@ page import="com.ning.metrics.action.hdfs.data.RowFileContentsIterator" %>
 <%@ page import="com.ning.metrics.action.hdfs.reader.HdfsEntry" %>
 <%@ page import="org.apache.commons.codec.binary.Base64" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ page import="java.net.URLEncoder" %>
+<%@ page import="java.util.Iterator" %>
 <%@page contentType="text/html" %>
 
 <%--
@@ -75,7 +75,7 @@
                 int currentLine = 1;
                 for (int i = 0; i < it.getEntries().size(); i++) {
                     HdfsEntry e = it.getEntries().get(i);
-                    RowFileContentsIterator content = e.getContent();
+                    Iterator<Row> content = e.getContent();
                     while (content.hasNext()) {
                         if (currentLine >= startLine && (currentLine <= endLine || endLine == -1)) {
             %>

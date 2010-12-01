@@ -20,11 +20,15 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.ning.metrics.action.hdfs.data.parser.RowParser;
 import com.ning.metrics.action.schema.Registrar;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Iterator;
 
 @Singleton
 public class RowFileContentsIteratorFactory
@@ -42,13 +46,22 @@ public class RowFileContentsIteratorFactory
         this.registrar = registrar;
     }
 
-    public RowFileContentsIterator build(FileSystem fs, Path path, boolean raw) throws IOException
+    public Iterator<Row> build(FileSystem fs, Path path, boolean raw) throws IOException
     {
-        return new RowFileContentsIterator(
-            path.toUri().getPath(),
-            rowParser,
-            registrar,
-            new SequenceFile.Reader(fs, path, fs.getConf()),
-            raw);
+        try {
+            return new RowSequenceFileContentsIterator(
+                path.toUri().getPath(),
+                rowParser,
+                registrar,
+                new SequenceFile.Reader(fs, path, fs.getConf()),
+                raw);
+        }
+        catch (IOException e) {
+            // Not a Sequence file?
+            FSDataInputStream input = fs.open(path);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+
+            return new RowTextFileContentsIterator(reader);
+        }
     }
 }

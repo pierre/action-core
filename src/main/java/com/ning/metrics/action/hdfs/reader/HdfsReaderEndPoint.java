@@ -50,7 +50,7 @@ public class HdfsReaderEndPoint
 
         this.fileSystem = FileSystem.get(conf);
 
-        log.info("Connected successfully to HDFS!");
+        log.debug("Connected successfully to HDFS!");
     }
 
     public boolean isDir(String path) throws IOException

@@ -35,9 +35,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public class RowFileContentsIterator implements Iterator<Row>, Closeable
+public class RowSequenceFileContentsIterator implements Iterator<Row>, Closeable
 {
-    private static final Logger log = Logger.getLogger(RowFileContentsIterator.class);
+    private static final Logger log = Logger.getLogger(RowSequenceFileContentsIterator.class);
 
     private final SequenceFile.Reader reader;
     private final boolean renderAsRow;
@@ -52,7 +52,7 @@ public class RowFileContentsIterator implements Iterator<Row>, Closeable
 
     @JsonCreator
     @SuppressWarnings("unused")
-    public RowFileContentsIterator(
+    public RowSequenceFileContentsIterator(
         @JsonProperty(JSON_CONTENT_PATH) String path,
         @JsonProperty(JSON_CONTENT_ENTRIES) List<Row> entries
     )
@@ -60,7 +60,7 @@ public class RowFileContentsIterator implements Iterator<Row>, Closeable
         this(path, null, null, null, true);
     }
 
-    public RowFileContentsIterator(String pathname, RowParser rowParser, Registrar registrar, SequenceFile.Reader reader, boolean rawContents)
+    public RowSequenceFileContentsIterator(String pathname, RowParser rowParser, Registrar registrar, SequenceFile.Reader reader, boolean rawContents)
     {
         this.pathname = pathname;
         this.rowParser = rowParser;

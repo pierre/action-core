@@ -1,8 +1,12 @@
 <%@
-page import="com.ning.metrics.action.hdfs.data.RowFileContentsIterator"
+page import="com.ning.metrics.action.hdfs.data.Row"
 %><%@
 page import="com.ning.metrics.action.hdfs.reader.HdfsEntry"
-%><%@ page import="org.apache.commons.lang.StringUtils"%><%@
+%><%@
+page import="org.apache.commons.lang.StringUtils"
+%><%@
+page import="java.util.Iterator"
+%><%@
 page contentType="text/plain"
 %><%--
   ~ Copyright 2010 Ning, Inc.
@@ -19,7 +23,6 @@ page contentType="text/plain"
   ~ License for the specific language governing permissions and limitations
   ~ under the License.
   --%>
-
 <jsp:useBean id="it" type="com.ning.metrics.action.hdfs.reader.HdfsListing" scope="request"/><%
                 int startLine = 1;
                 int endLine = -1;
@@ -46,6 +49,6 @@ for (int i = 0; i < it.getEntries().size(); i++) {
     if (e.isDirectory()) {
         continue;
     }
-    RowFileContentsIterator content = e.getContent();
+    Iterator<Row> content = e.getContent();
     while (content.hasNext()) { if (currentLine >= startLine && (currentLine <= endLine || endLine == -1)) {%><%= content.next().toString() %>
 <%  } else { content.next(); } currentLine++; if (endLine != -1 && endLine < currentLine) { break; } } } %>
