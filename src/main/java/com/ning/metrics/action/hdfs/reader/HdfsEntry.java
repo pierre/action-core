@@ -131,7 +131,7 @@ public class HdfsEntry
             format.setMaximumFractionDigits(1);
         }
 
-        return format.format(size) + " " + SIZES[i];
+        return format.format(sizeInBytes) + " " + SIZES[i];
     }
 
     public short getReplication()
