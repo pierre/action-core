@@ -32,7 +32,7 @@ import javax.servlet.ServletContextEvent;
  * <pre>
  * &lt;context-param&gt;
  *   &lt;param-name&gt;guiceModuleClassName&lt;/param-name&gt;
- *   &lt;param-value&gt;com.ning.metrics.action.binder.modules.CollectorServerModule&lt;/param-value&gt;
+ *   &lt;param-value&gt;com.ning.metrics.action.binder.modules.ActionCoreServerModule&lt;/param-value&gt;
  *  &lt;/context-param&gt;
  * </pre>
  */

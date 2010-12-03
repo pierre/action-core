@@ -20,7 +20,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.servlet.ServletModule;
-import com.ning.metrics.action.binder.CollectorContainer;
+import com.ning.metrics.action.binder.ActionCoreContainer;
 import com.ning.metrics.action.binder.config.ActionCoreConfig;
 import com.ning.metrics.action.hdfs.data.RowFileContentsIteratorFactory;
 import com.ning.metrics.action.schema.GoodwillRegistrar;
@@ -29,7 +29,7 @@ import com.sun.jersey.api.core.PackagesResourceConfig;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import org.skife.config.ConfigurationObjectFactory;
 
-public class CollectorServerModule extends ServletModule
+public class ActionCoreServerModule extends ServletModule
 {
     @Override
     protected void configureServlets()
@@ -56,7 +56,7 @@ public class CollectorServerModule extends ServletModule
         // com.sun.jersey.api.container.ContainerException: java.lang.IllegalStateException: Committed
         //	at com.sun.jersey.server.impl.container.servlet.JSPTemplateProcessor.writeTo(JSPTemplateProcessor.java:124)
         //	at com.sun.jersey.server.impl.container.servlet.JSPTemplateProcessor.writeTo(JSPTemplateProcessor.java:60)
-        filter("/*").through(CollectorContainer.class, ImmutableMap.of(
+        filter("/*").through(ActionCoreContainer.class, ImmutableMap.of(
             PackagesResourceConfig.PROPERTY_PACKAGES, "com.ning.metrics.action.endpoint"
         ));
     }

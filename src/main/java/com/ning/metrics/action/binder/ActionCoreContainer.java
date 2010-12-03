@@ -24,10 +24,10 @@ import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import javax.servlet.ServletException;
 
 @Singleton
-public class CollectorContainer extends GuiceContainer
+public class ActionCoreContainer extends GuiceContainer
 {
     @Inject
-    public CollectorContainer(final Injector injector)
+    public ActionCoreContainer(final Injector injector)
     {
         super(injector);
     }

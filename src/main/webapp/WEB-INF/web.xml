@@ -25,7 +25,7 @@
     <display-name>action-core</display-name>
     <context-param>
         <param-name>guiceModuleClassName</param-name>
-        <param-value>com.ning.metrics.action.binder.modules.CollectorServerModule</param-value>
+        <param-value>com.ning.metrics.action.binder.modules.ActionCoreServerModule</param-value>
     </context-param>
     <filter>
         <!-- Guice emulates Servlet API with DI -->
