@@ -290,7 +290,6 @@
                 <configuration>
                     <scanIntervalSeconds>10</scanIntervalSeconds>
                     <contextPath>/</contextPath>
-                    <webDefaultXml>/Users/pierre/open-source/jetty-6.1.22/etc/webdefault.xml</webDefaultXml>
                     <systemProperties>
                         <systemProperty>
                             <name>log4j.configuration</name>
