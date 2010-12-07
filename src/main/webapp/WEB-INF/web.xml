@@ -44,12 +44,4 @@
         <!-- Context listener: called at startup time and creates the injector -->
         <listener-class>com.ning.metrics.action.binder.modules.SetupServer</listener-class>
     </listener>
-    <servlet>
-        <servlet-name>log-invalid-resources</servlet-name>
-        <servlet-class>com.ning.metrics.action.endpoint.LogInvalidResourcesServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>log-invalid-resources</servlet-name>
-        <url-pattern>/*</url-pattern>
-    </servlet-mapping>
 </web-app>
