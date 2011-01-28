@@ -6,3 +6,5 @@ target
 staging
 overlays
 examples
+pom.xml.releaseBackup
+release.properties
