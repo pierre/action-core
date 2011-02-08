@@ -25,6 +25,7 @@ import com.ning.metrics.serialization.thrift.item.DataItemDeserializer;
 import com.ning.metrics.serialization.thrift.item.DataItemFactory;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableUtils;
+import org.apache.thrift.protocol.TType;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.annotate.JsonCreator;
@@ -187,7 +188,7 @@ public class Row implements WritableComparable
         int i = 0;
         g.writeStartObject();
         for (DataItem item : data) {
-            g.writeStringField(schema.getFieldNameByPosition(i), item.toString());
+            g.writeObjectField(schema.getFieldNameByPosition(i), getJsonValue(item));
             i++;
         }
         g.writeEndObject();
@@ -238,14 +239,36 @@ public class Row implements WritableComparable
     @SuppressWarnings({"unchecked", "unused"})
     public ImmutableMap toMap()
     {
-        ArrayList<String> rows = new ArrayList<String>();
+        ImmutableMap.Builder b = new ImmutableMap.Builder();
 
+        int i = 0;
         for (DataItem item : data) {
-            rows.add(item.getString());
+            b.put(schema.getFieldNameByPosition(i), getJsonValue(item));
+            i++;
         }
 
-        return new ImmutableMap.Builder()
-            .put(JSON_ROW_ENTRIES, rows)
-            .build();
+        return b.build();
+    }
+
+    private Object getJsonValue(DataItem dataItem)
+    {
+        switch (dataItem.getThriftType()) {
+            case TType.BOOL:
+                return dataItem.getBoolean();
+            case TType.BYTE:
+                return dataItem.getByte();
+            case TType.I16:
+                return dataItem.getShort();
+            case TType.I32:
+                return dataItem.getInteger();
+            case TType.I64:
+                return dataItem.getLong();
+            case TType.DOUBLE:
+                return dataItem.getDouble();
+            case TType.STRING:
+                return dataItem.getString();
+            default:
+                return dataItem.getString();
+        }
     }
 }

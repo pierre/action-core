@@ -61,9 +61,9 @@
                 <td colspan="3"></td>
             </tr>
             <tr>
-                <td><a href="/rest/1.0/json?path=<%= it.getPath() %>&amp;recursive=true" target="_blank">Recursive JSON
+                <td><a href="/rest/1.0/json?path=<%= it.getPath() %>&amp;recursive=true&amp;raw=false" target="_blank">Recursive JSON
                     listing</a> (<a
-                        href="/rest/1.0/json?path=<%= it.getPath() %>&amp;recursive=true&amp;pretty=true"
+                        href="/rest/1.0/json?path=<%= it.getPath() %>&amp;recursive=true&amp;pretty=true&amp;raw=false"
                         target="_blank">pretty</a>)
                 </td>
                 <td colspan="3"></td>

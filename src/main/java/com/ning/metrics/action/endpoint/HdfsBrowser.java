@@ -95,10 +95,11 @@ public class HdfsBrowser
     public Response listingToJson(
         @QueryParam("path") String path,
         @QueryParam("recursive") boolean recursive,
-        @QueryParam("pretty") boolean pretty
+        @QueryParam("pretty") boolean pretty,
+        @QueryParam("raw") boolean raw
     ) throws IOException
     {
-        final HdfsListing hdfsListing = hdfsReader.getListing(path, true, recursive);
+        final HdfsListing hdfsListing = hdfsReader.getListing(path, raw, recursive);
 
         if (pretty) {
             ObjectMapper mapper = new ObjectMapper();
@@ -130,8 +131,6 @@ public class HdfsBrowser
     public Response prettyPrintOneLine(
         @QueryParam("object") String object) throws IOException
     {
-        // TODO: retrieve the goodwill schema to output properly the json payload (respect integers, ...)
-
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ObjectMapper mapper = new ObjectMapper();
 
