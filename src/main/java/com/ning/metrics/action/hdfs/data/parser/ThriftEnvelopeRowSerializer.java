@@ -18,6 +18,7 @@ package com.ning.metrics.action.hdfs.data.parser;
 
 import com.ning.metrics.action.hdfs.data.Row;
 import com.ning.metrics.action.hdfs.data.RowAccessException;
+import com.ning.metrics.action.hdfs.data.RowFactory;
 import com.ning.metrics.action.hdfs.data.schema.ColumnKey;
 import com.ning.metrics.action.hdfs.data.schema.DynamicColumnKey;
 import com.ning.metrics.action.hdfs.data.schema.RowSchema;
@@ -67,6 +68,6 @@ public class ThriftEnvelopeRowSerializer implements RowSerializer
             data.add(field.getDataItem());
         }
 
-        return new Row(new RowSchema(envelope.getTypeName(), columnKeyList), data);
+        return RowFactory.getRow(new RowSchema(envelope.getTypeName(), columnKeyList), data);
     }
 }

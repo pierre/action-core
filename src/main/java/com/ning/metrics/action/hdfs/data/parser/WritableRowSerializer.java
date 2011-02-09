@@ -18,16 +18,17 @@ package com.ning.metrics.action.hdfs.data.parser;
 
 import com.ning.metrics.action.hdfs.data.Row;
 import com.ning.metrics.action.hdfs.data.RowAccessException;
+import com.ning.metrics.action.hdfs.data.RowFactory;
+import com.ning.metrics.action.hdfs.data.RowThrift;
 import com.ning.metrics.action.hdfs.data.schema.ColumnKey;
 import com.ning.metrics.action.hdfs.data.schema.DynamicColumnKey;
 import com.ning.metrics.action.hdfs.data.schema.RowSchema;
 import com.ning.metrics.action.schema.Registrar;
-import com.ning.metrics.serialization.thrift.item.DataItem;
-import com.ning.metrics.serialization.thrift.item.DataItemFactory;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class WritableRowSerializer implements RowSerializer
@@ -46,17 +47,15 @@ public class WritableRowSerializer implements RowSerializer
         if (value instanceof Text) {
             String[] data = value.toString().split("\t");
             List<ColumnKey> columnKeyList = new ArrayList<ColumnKey>();
-            DataItem[] items = new DataItem[data.length];
 
             for (int i = 0; i < data.length; i++) {
                 columnKeyList.add(new DynamicColumnKey(String.valueOf("col-" + i)));
-                items[i] = DataItemFactory.create(data[i]);
             }
 
-            row = new Row(new RowSchema("Text", columnKeyList), items);
+            row = RowFactory.getRow(new RowSchema("Text", columnKeyList), Arrays.asList(data));
         }
-        else if (value instanceof Row) {
-            row = (Row) value;
+        else if (value instanceof RowThrift) {
+            row = (RowThrift) value;
         }
         else {
             throw new RowAccessException(String.format("Writable [%s] is not a known row type", value == null ? null : value.getClass()));

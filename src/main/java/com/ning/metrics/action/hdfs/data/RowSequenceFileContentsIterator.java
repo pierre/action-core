@@ -21,7 +21,6 @@ import com.ning.metrics.action.hdfs.data.parser.RowParser;
 import com.ning.metrics.action.hdfs.data.schema.DynamicColumnKey;
 import com.ning.metrics.action.hdfs.data.schema.RowSchema;
 import com.ning.metrics.action.schema.Registrar;
-import com.ning.metrics.serialization.thrift.item.DataItemFactory;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.annotate.JsonCreator;
@@ -131,8 +130,9 @@ public class RowSequenceFileContentsIterator implements Iterator<Row>, Closeable
                     Object value = reader.getCurrentValue((Object) null);
 
                     if (renderAsRow) {
-                        row = new Row(new RowSchema("ad-hoc"));
-                        row.addCol(new DynamicColumnKey("record"), DataItemFactory.create(value.toString()));
+                        ArrayList<String> list = new ArrayList<String>();
+                        list.add(value.toString());
+                        row = RowFactory.getRow(new RowSchema("ad-hoc", new DynamicColumnKey("record")), list);
                     }
                     else {
                         row = rowParser.valueToRow(registrar, value);

@@ -18,12 +18,12 @@ package com.ning.metrics.action.hdfs.data;
 
 import com.ning.metrics.action.hdfs.data.schema.DynamicColumnKey;
 import com.ning.metrics.action.hdfs.data.schema.RowSchema;
-import com.ning.metrics.serialization.thrift.item.DataItemFactory;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -72,9 +72,10 @@ public class RowTextFileContentsIterator implements Iterator<Row>, Closeable
             throw new NoSuchElementException();
         }
 
-        Row row = new Row(new RowSchema("ad-hoc"));
+        ArrayList<String> list = new ArrayList<String>();
+        list.add(line);
+        Row row = RowFactory.getRow(new RowSchema("ad-hoc", new DynamicColumnKey("record")), list);
 
-        row.addCol(new DynamicColumnKey("record"), DataItemFactory.create(line));
         line = null;
 
         return row;
