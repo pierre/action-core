@@ -24,9 +24,11 @@ import com.ning.metrics.action.hdfs.data.schema.ColumnKey;
 import com.ning.metrics.action.hdfs.data.schema.DynamicColumnKey;
 import com.ning.metrics.action.hdfs.data.schema.RowSchema;
 import com.ning.metrics.action.schema.Registrar;
+import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -53,6 +55,14 @@ public class WritableRowSerializer implements RowSerializer
             }
 
             row = RowFactory.getRow(new RowSchema("Text", columnKeyList), Arrays.asList(data));
+        }
+        else if (value instanceof BytesWritable) {
+            byte[] data = ((BytesWritable) value).getBytes();
+
+            ArrayList<String> listData = new ArrayList<String>();
+            listData.add(new String(data, Charset.forName("UTF-8")));
+
+            row = RowFactory.getRow(new RowSchema("BytesWritable", new DynamicColumnKey(String.valueOf("col-1"))), listData);
         }
         else if (value instanceof RowThrift) {
             row = (RowThrift) value;
