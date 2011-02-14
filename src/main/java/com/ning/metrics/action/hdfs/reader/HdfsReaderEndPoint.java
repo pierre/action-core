@@ -19,6 +19,7 @@ package com.ning.metrics.action.hdfs.reader;
 import com.google.inject.Inject;
 import com.ning.metrics.action.binder.config.ActionCoreConfig;
 import com.ning.metrics.action.hdfs.data.RowFileContentsIteratorFactory;
+import com.ning.metrics.serialization.hadoop.HadoopSmileOutputStreamSerialization;
 import com.ning.metrics.serialization.hadoop.HadoopThriftEnvelopeSerialization;
 import com.ning.metrics.serialization.hadoop.HadoopThriftWritableSerialization;
 import org.apache.hadoop.conf.Configuration;
@@ -46,7 +47,11 @@ public class HdfsReaderEndPoint
 
         conf.set("fs.default.name", config.getNamenodeUrl());
         conf.set("hadoop.job.ugi", config.getHadoopUgi());
-        conf.setStrings("io.serializations", HadoopThriftWritableSerialization.class.getName(), HadoopThriftEnvelopeSerialization.class.getName(), "org.apache.hadoop.io.serializer.WritableSerialization", config.getSerializations());
+        conf.setStrings("io.serializations", HadoopThriftWritableSerialization.class.getName(),
+            HadoopThriftEnvelopeSerialization.class.getName(),
+            HadoopSmileOutputStreamSerialization.class.getName(),
+            "org.apache.hadoop.io.serializer.WritableSerialization",
+            config.getSerializations());
 
         this.fileSystem = FileSystem.get(conf);
 

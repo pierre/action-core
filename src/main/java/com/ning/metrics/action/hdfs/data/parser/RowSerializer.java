@@ -16,13 +16,30 @@
 
 package com.ning.metrics.action.hdfs.data.parser;
 
-import com.ning.metrics.action.hdfs.data.Row;
 import com.ning.metrics.action.hdfs.data.RowAccessException;
+import com.ning.metrics.action.hdfs.data.Rows;
 import com.ning.metrics.action.schema.Registrar;
 
+/**
+ * Read a row worth of data from Hadoop and decode it in the right format.
+ * The is where the whole magic happens.
+ */
 public interface RowSerializer
 {
     public boolean accept(Object o);
 
-    public Row toRow(Registrar r, Object o) throws RowAccessException;
+    /**
+     * Create a row with decoded data from a generic Object o.
+     * <p/>
+     * The Hadoop SequenceFile.Reader returns an Object back that we need to understand. This method
+     * generate the Row and decode the data as necessary.
+     * If a valid registrar is specified, some more advanced decoding can be performed
+     *
+     * @param r Registrar, describing the columns
+     * @param o Object from Hadoop to decode (e.g. written by the collector)
+     * @return a Row representation with associated data decoded
+     * @throws RowAccessException Generic deserialization error
+     * @see com.ning.metrics.action.hdfs.data.schema.RowSchema
+     */
+    public Rows toRows(Registrar r, Object o) throws RowAccessException;
 }

@@ -43,6 +43,7 @@ public class RowSequenceFileContentsIterator implements Iterator<Row>, Closeable
     private final String pathname;
     private final RowParser rowParser;
     private Row row;
+    private Rows batchedRows = new Rows();
     private boolean readerClosed = false;
     private final Registrar registrar;
 
@@ -72,7 +73,12 @@ public class RowSequenceFileContentsIterator implements Iterator<Row>, Closeable
     public boolean hasNext()
     {
         if (row == null) {
-            row = readRow();
+            Rows newRows = readRows();
+            if (newRows != null) {
+                batchedRows.addAll(newRows);
+            }
+
+            row = batchedRows.poll();
         }
 
         return row != null;
@@ -84,7 +90,6 @@ public class RowSequenceFileContentsIterator implements Iterator<Row>, Closeable
         hasNext();
 
         Row returnRow = row;
-
         row = null;
 
         if (returnRow == null) {
@@ -114,7 +119,7 @@ public class RowSequenceFileContentsIterator implements Iterator<Row>, Closeable
         }
     }
 
-    private Row readRow()
+    private Rows readRows()
     {
         try {
             if (readerClosed) {
@@ -122,27 +127,32 @@ public class RowSequenceFileContentsIterator implements Iterator<Row>, Closeable
             }
             else {
                 Object key = reader.next((Object) null);
-                Row row = null;
+                Rows rows = new Rows();
 
                 if (key != null) {
                     log.debug(String.format("Read object [%s]", key));
 
                     Object value = reader.getCurrentValue((Object) null);
 
+                    if (value == null) {
+                        close();
+                        return rows;
+                    }
+
                     if (renderAsRow) {
                         ArrayList<String> list = new ArrayList<String>();
                         list.add(value.toString());
-                        row = RowFactory.getRow(new RowSchema("ad-hoc", new DynamicColumnKey("record")), list);
+                        rows.add(RowFactory.getRow(new RowSchema("ad-hoc", new DynamicColumnKey("record")), list));
                     }
                     else {
-                        row = rowParser.valueToRow(registrar, value);
+                        rows = rowParser.valueToRows(registrar, value);
                     }
                 }
                 else {
                     close();
                 }
 
-                return row;
+                return rows;
             }
         }
         catch (IOException e) {

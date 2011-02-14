@@ -20,6 +20,7 @@ import com.ning.metrics.action.hdfs.data.Row;
 import com.ning.metrics.action.hdfs.data.RowAccessException;
 import com.ning.metrics.action.hdfs.data.RowFactory;
 import com.ning.metrics.action.hdfs.data.RowThrift;
+import com.ning.metrics.action.hdfs.data.Rows;
 import com.ning.metrics.action.hdfs.data.schema.ColumnKey;
 import com.ning.metrics.action.hdfs.data.schema.DynamicColumnKey;
 import com.ning.metrics.action.hdfs.data.schema.RowSchema;
@@ -42,7 +43,7 @@ public class WritableRowSerializer implements RowSerializer
     }
 
     @Override
-    public Row toRow(Registrar r, Object value) throws RowAccessException
+    public Rows toRows(Registrar r, Object value) throws RowAccessException
     {
         Row row;
 
@@ -71,6 +72,9 @@ public class WritableRowSerializer implements RowSerializer
             throw new RowAccessException(String.format("Writable [%s] is not a known row type", value == null ? null : value.getClass()));
         }
 
-        return row;
+        Rows rows = new Rows();
+        rows.add(row);
+
+        return rows;
     }
 }

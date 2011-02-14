@@ -41,7 +41,7 @@ public class ActionCoreConfig
     @Config(value = "action.hadoop.io.row.serializations")
     public String getRowSerializations()
     {
-        return "com.ning.metrics.action.hdfs.data.parser.ThriftEnvelopeRowSerializer,com.ning.metrics.action.hdfs.data.parser.WritableRowSerializer";
+        return "";
     }
 
     @Config(value = "action.hadoop.io.serializations")

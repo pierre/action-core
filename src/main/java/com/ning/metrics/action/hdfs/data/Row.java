@@ -24,6 +24,7 @@ import org.apache.hadoop.io.WritableComparable;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.annotate.JsonValue;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -39,6 +40,9 @@ import java.util.List;
  */
 public abstract class Row<T extends Comparable, Serializable> implements WritableComparable
 {
+    protected final static JsonFactory jsonFactory = new JsonFactory();
+    private static final ObjectMapper jsonObjectMapper = new ObjectMapper(jsonFactory);
+
     public static final String JSON_ROW_ENTRIES = "entries";
 
     private static final String DELIM = ",";
@@ -205,18 +209,19 @@ public abstract class Row<T extends Comparable, Serializable> implements Writabl
 
     public String toJSON() throws IOException
     {
-        JsonFactory f = new JsonFactory();
         StringWriter s = new StringWriter();
-        JsonGenerator g = f.createJsonGenerator(s);
+        JsonGenerator g = jsonObjectMapper.getJsonFactory().createJsonGenerator(s);
 
         int i = 0;
         g.writeStartObject();
         for (T item : data) {
-            g.writeObjectField(schema.getFieldNameByPosition(i), getJsonValue(item));
+            g.writeFieldName(schema.getFieldNameByPosition(i));
+            jsonObjectMapper.writeValue(g, getJsonValue(item));
             i++;
         }
         g.writeEndObject();
         g.flush();
+        g.close();
 
         return s.toString();
     }
