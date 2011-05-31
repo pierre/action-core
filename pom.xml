@@ -14,7 +14,8 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.sonatype.oss</groupId>
         <artifactId>oss-parent</artifactId>
@@ -246,10 +247,21 @@
                 </executions>
             </plugin>
             <plugin>
-                <!-- See reporting section for configuration -->
                 <groupId>org.apache.rat</groupId>
                 <artifactId>apache-rat-plugin</artifactId>
                 <version>0.7</version>
+                <configuration>
+                    <excludes>
+                        <!-- For some reason, useIdeaDefaultExcludes doesn't pick up .idea directory -->
+                        <exclude>.idea/**</exclude>
+                        <exclude>.git/**</exclude>
+                        <exclude>.gitignore</exclude>
+                        <exclude>deploy.sh</exclude>
+                        <exclude>src/site/**</exclude>
+                        <exclude>examples/**</exclude>
+                        <exclude>README.rdoc</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <phase>verify</phase>
@@ -415,18 +427,6 @@
                 <groupId>org.apache.rat</groupId>
                 <artifactId>apache-rat-plugin</artifactId>
                 <version>0.7</version>
-                <configuration>
-                    <excludes>
-                        <!-- For some reason, useIdeaDefaultExcludes doesn't pick up .idea directory -->
-                        <exclude>.idea/**</exclude>
-                        <exclude>.git/**</exclude>
-                        <exclude>.gitignore</exclude>
-                        <exclude>deploy.sh</exclude>
-                        <exclude>src/site/**</exclude>
-                        <exclude>examples/**</exclude>
-                        <exclude>README.rdoc</exclude>
-                    </excludes>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
