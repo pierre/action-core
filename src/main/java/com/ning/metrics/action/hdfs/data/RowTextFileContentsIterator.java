@@ -16,88 +16,77 @@
 
 package com.ning.metrics.action.hdfs.data;
 
+import com.ning.metrics.action.hdfs.data.parser.RowParser;
 import com.ning.metrics.action.hdfs.data.schema.DynamicColumnKey;
 import com.ning.metrics.action.hdfs.data.schema.RowSchema;
-import org.apache.log4j.Logger;
+import com.ning.metrics.action.schema.Registrar;
 
 import java.io.BufferedReader;
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.List;
 
-public class RowTextFileContentsIterator implements Iterator<Row>, Closeable
+/**
+ * Iterator for flat file (can contain binary data)
+ */
+class RowTextFileContentsIterator extends RowFileContentsIterator
 {
-    private static final Logger log = Logger.getLogger(RowTextFileContentsIterator.class);
-
-    private String line;
     private final BufferedReader reader;
-    private boolean isReaderClosed = false;
 
-    public RowTextFileContentsIterator(BufferedReader reader)
+    public RowTextFileContentsIterator(final String pathname, final RowParser rowParser, final Registrar registrar, final BufferedReader reader, final boolean rawContents)
     {
+        super(pathname, rowParser, registrar, rawContents);
         this.reader = reader;
-    }
-
-    @Override
-    public boolean hasNext()
-    {
-        try {
-            if (line == null) {
-                line = reader.readLine();
-            }
-
-            boolean hasNext = line != null;
-
-            if (!hasNext) {
-                close();
-            }
-
-            return hasNext;
-        }
-        catch (IOException e1) {
-            close();
-
-            return false;
-        }
-    }
-
-    @Override
-    public Row next()
-    {
-        hasNext();
-
-        if (line == null) {
-            throw new NoSuchElementException();
-        }
-
-        ArrayList<String> list = new ArrayList<String>();
-        list.add(line);
-        Row row = RowFactory.getRow(new RowSchema("ad-hoc", new DynamicColumnKey("record")), list);
-
-        line = null;
-
-        return row;
-    }
-
-    @Override
-    public void remove()
-    {
-        throw new UnsupportedOperationException("remove not implemented; read-only iterator");
     }
 
     @Override
     public void close()
     {
-        try {
-            if (!isReaderClosed) {
+        if (!readerClosed) {
+            try {
                 reader.close();
-                isReaderClosed = true;
+                readerClosed = true;
+            }
+            catch (IOException e) {
+                log.warn(String.format("Unable to close reader: %s", e));
+            }
+        }
+    }
+
+    @Override
+    Rows readRows()
+    {
+        try {
+            if (readerClosed) {
+                return null;
+            }
+            else {
+                Rows rows = new Rows();
+                final String value = reader.readLine();
+
+                if (value == null) {
+                    close();
+                    return rows;
+                }
+
+                if (renderAsRow) {
+                    final List<String> list = new ArrayList<String>();
+                    list.add(value);
+                    rows.add(RowFactory.getRow(new RowSchema("ad-hoc", new DynamicColumnKey("record")), list));
+                }
+                else {
+                    rows = rowParser.valueToRows(registrar, value);
+                }
+
+                return rows;
             }
         }
         catch (IOException e) {
-            log.warn("Unable to close hdfs reader", e);
+            log.info(String.format("IOException reading file %s, skipping", pathname));
+
+            close();
+
+            return null;
         }
     }
 }

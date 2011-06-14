@@ -16,93 +16,24 @@
 
 package com.ning.metrics.action.hdfs.data;
 
-import com.google.common.collect.ImmutableMap;
 import com.ning.metrics.action.hdfs.data.parser.RowParser;
 import com.ning.metrics.action.hdfs.data.schema.DynamicColumnKey;
 import com.ning.metrics.action.hdfs.data.schema.RowSchema;
 import com.ning.metrics.action.schema.Registrar;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.log4j.Logger;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.annotate.JsonValue;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 
-public class RowSequenceFileContentsIterator implements Iterator<Row>, Closeable
+class RowSequenceFileContentsIterator extends RowFileContentsIterator
 {
-    private static final Logger log = Logger.getLogger(RowSequenceFileContentsIterator.class);
-
     private final SequenceFile.Reader reader;
-    private final boolean renderAsRow;
-    private final String pathname;
-    private final RowParser rowParser;
-    private Row row;
-    private Rows batchedRows = new Rows();
-    private boolean readerClosed = false;
-    private final Registrar registrar;
 
-    public static final String JSON_CONTENT_PATH = "path";
-    public static final String JSON_CONTENT_ENTRIES = "entries";
-
-    @JsonCreator
-    @SuppressWarnings("unused")
-    public RowSequenceFileContentsIterator(
-        @JsonProperty(JSON_CONTENT_PATH) String path,
-        @JsonProperty(JSON_CONTENT_ENTRIES) List<Row> entries
-    )
+    public RowSequenceFileContentsIterator(final String pathname, final RowParser rowParser, final Registrar registrar, final SequenceFile.Reader reader, final boolean rawContents)
     {
-        this(path, null, null, null, true);
-    }
-
-    public RowSequenceFileContentsIterator(String pathname, RowParser rowParser, Registrar registrar, SequenceFile.Reader reader, boolean rawContents)
-    {
-        this.pathname = pathname;
-        this.rowParser = rowParser;
-        this.registrar = registrar;
+        super(pathname, rowParser, registrar, rawContents);
         this.reader = reader;
-        this.renderAsRow = rawContents;
-    }
-
-    @Override
-    public boolean hasNext()
-    {
-        if (row == null) {
-            Rows newRows = readRows();
-            if (newRows != null) {
-                batchedRows.addAll(newRows);
-            }
-
-            row = batchedRows.poll();
-        }
-
-        return row != null;
-    }
-
-    @Override
-    public Row next()
-    {
-        hasNext();
-
-        Row returnRow = row;
-        row = null;
-
-        if (returnRow == null) {
-            throw new NoSuchElementException();
-        }
-
-        return returnRow;
-    }
-
-    @Override
-    public void remove()
-    {
-        throw new UnsupportedOperationException("remove not implemented; read-only iterator");
     }
 
     @Override
@@ -119,20 +50,21 @@ public class RowSequenceFileContentsIterator implements Iterator<Row>, Closeable
         }
     }
 
-    private Rows readRows()
+    @Override
+    Rows readRows()
     {
         try {
             if (readerClosed) {
                 return null;
             }
             else {
-                Object key = reader.next((Object) null);
+                final Object key = reader.next((Object) null);
                 Rows rows = new Rows();
 
                 if (key != null) {
                     log.debug(String.format("Read object [%s]", key));
 
-                    Object value = reader.getCurrentValue((Object) null);
+                    final Object value = reader.getCurrentValue((Object) null);
 
                     if (value == null) {
                         close();
@@ -140,7 +72,7 @@ public class RowSequenceFileContentsIterator implements Iterator<Row>, Closeable
                     }
 
                     if (renderAsRow) {
-                        ArrayList<String> list = new ArrayList<String>();
+                        final List<String> list = new ArrayList<String>();
                         list.add(value.toString());
                         rows.add(RowFactory.getRow(new RowSchema("ad-hoc", new DynamicColumnKey("record")), list));
                     }
@@ -162,21 +94,5 @@ public class RowSequenceFileContentsIterator implements Iterator<Row>, Closeable
 
             return null;
         }
-    }
-
-    @JsonValue
-    @SuppressWarnings({"unchecked", "unused"})
-    public ImmutableMap toMap()
-    {
-        ArrayList<Row> rows = new ArrayList<Row>();
-
-        while (hasNext()) {
-            rows.add(next());
-        }
-
-        return new ImmutableMap.Builder()
-            .put(JSON_CONTENT_PATH, pathname)
-            .put(JSON_CONTENT_ENTRIES, rows)
-            .build();
     }
 }

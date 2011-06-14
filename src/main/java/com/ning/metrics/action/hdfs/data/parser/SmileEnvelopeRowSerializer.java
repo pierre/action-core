@@ -25,13 +25,13 @@ import com.ning.metrics.action.hdfs.data.schema.DynamicColumnKey;
 import com.ning.metrics.action.hdfs.data.schema.RowSchema;
 import com.ning.metrics.action.schema.Registrar;
 import com.ning.metrics.goodwill.access.GoodwillSchemaField;
-import com.ning.metrics.serialization.smile.SmileBucket;
-import com.ning.metrics.serialization.smile.SmileBucketDeserializer;
+import com.ning.metrics.serialization.event.SmileEnvelopeEvent;
+import com.ning.metrics.serialization.smile.SmileEnvelopeEventDeserializer;
 import com.ning.metrics.serialization.smile.SmileOutputStream;
 import org.codehaus.jackson.JsonNode;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -49,35 +49,38 @@ public class SmileEnvelopeRowSerializer implements RowSerializer
     }
 
     @Override
-    public Rows toRows(Registrar r, Object value) throws RowAccessException
+    public Rows toRows(final Registrar r, final Object value) throws RowAccessException
     {
-        SmileOutputStream stream = (SmileOutputStream) value;
-
-        SmileBucket bucket;
+        final SmileEnvelopeEventDeserializer deserializer;
         try {
-            bucket = SmileBucketDeserializer.deserialize(new ByteArrayInputStream(stream.toByteArray()));
+            deserializer = new SmileEnvelopeEventDeserializer((InputStream) value, false);
         }
         catch (IOException e) {
             throw new RowAccessException(e);
         }
 
-        Rows rows = new Rows();
+        final Rows rows = new Rows();
+        while (deserializer.hasNextEvent()) {
+            SmileEnvelopeEvent event;
+            try {
+                event = deserializer.getNextEvent();
+            }
+            catch (IOException e) {
+                throw new RowAccessException(e);
+            }
+            final JsonNode node = (JsonNode) event.getData();
 
-        List<JsonNodeComparable> data;
-        List<ColumnKey> columnKeyList;
-        // Theoretically, all events in the stream are of the same type
-        for (JsonNode node : bucket) {
-            data = new ArrayList<JsonNodeComparable>(node.size());
-            columnKeyList = new ArrayList<ColumnKey>(node.size());
+            final List<JsonNodeComparable> data = new ArrayList<JsonNodeComparable>(node.size());
+            final List<ColumnKey> columnKeyList = new ArrayList<ColumnKey>(node.size());
 
-            Map<Short, GoodwillSchemaField> schema = r.getSchema(stream.getTypeName());
+            final Map<Short, GoodwillSchemaField> schema = r.getSchema(event.getName());
 
             // TODO Fragile - need field IDs
             int i = 0;
-            Iterator it = node.getElements();
+            final Iterator it = node.getElements();
             while (it.hasNext()) {
                 i++;
-                JsonNode nodeField = (JsonNode) it.next();
+                final JsonNode nodeField = (JsonNode) it.next();
 
                 GoodwillSchemaField schemaField = null;
                 if (schema != null) {
@@ -95,7 +98,7 @@ public class SmileEnvelopeRowSerializer implements RowSerializer
                 data.add(new JsonNodeComparable(nodeField));
             }
 
-            rows.add(RowFactory.getRow(new RowSchema(stream.getTypeName(), columnKeyList), data));
+            rows.add(RowFactory.getRow(new RowSchema(event.getName(), columnKeyList), data));
         }
 
         return rows;

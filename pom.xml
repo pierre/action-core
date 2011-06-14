@@ -43,7 +43,7 @@
     </scm>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- Depend on Apache Hadoop by default. Use cloudera profile for Cloudera's version -->
+        <!-- The Cloudera profile is enabled by default, see below -->
         <hadoop.version>0.20.2</hadoop.version>
     </properties>
     <repositories>
@@ -56,7 +56,7 @@
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.4</version>
+            <version>1.5</version>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
@@ -87,22 +87,22 @@
         <dependency>
             <groupId>com.ning</groupId>
             <artifactId>metrics.goodwill-access</artifactId>
-            <version>0.0.9</version>
+            <version>0.1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.ning</groupId>
             <artifactId>metrics.serialization-hadoop</artifactId>
-            <version>1.2.0</version>
+            <version>2.0.0-pre6-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.ning</groupId>
             <artifactId>metrics.serialization-smile</artifactId>
-            <version>1.2.0</version>
+            <version>2.0.0-pre6-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.ning</groupId>
             <artifactId>metrics.serialization-thrift</artifactId>
-            <version>1.2.0</version>
+            <version>2.0.0-pre6-SNAPSHOT</version>
         </dependency>
         <dependency>
             <!-- Viewable body writer -->
@@ -123,18 +123,30 @@
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-            <version>1.6</version>
+            <version>1.6.2</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
-            <version>1.2.13</version>
+            <version>1.2.16</version>
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-core</artifactId>
             <version>${hadoop.version}</version>
             <exclusions>
+                <exclusion>
+                    <groupId>commons-el</groupId>
+                    <artifactId>commons-el</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.servlet.jsp</groupId>
+                    <artifactId>jsp-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.java.dev.jets3t</groupId>
+                    <artifactId>jets3t</artifactId>
+                </exclusion>
                 <exclusion><!-- That's for CDH only -->
                     <groupId>org.codehaus.jackson</groupId>
                     <artifactId>jackson-mapper-asl</artifactId>
@@ -172,17 +184,17 @@
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-core-asl</artifactId>
-            <version>1.7.2</version>
+            <version>1.8.1</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-jaxrs</artifactId>
-            <version>1.7.2</version>
+            <version>1.8.1</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-mapper-asl</artifactId>
-            <version>1.7.2</version>
+            <version>1.8.1</version>
         </dependency>
         <dependency>
             <groupId>org.mortbay.jetty</groupId>
@@ -193,28 +205,33 @@
         <dependency>
             <groupId>org.skife.config</groupId>
             <artifactId>config-magic</artifactId>
-            <version>0.5</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
+            <version>0.8</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jul-to-slf4j</artifactId>
-            <version>1.5.6</version>
+            <version>1.6.1</version>
+        </dependency>
+        <dependency><!-- Needed for generated Scribe and Thrift classes -->
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.6.1</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
     <profiles>
         <profile>
             <id>cloudera</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <hadoop.version>0.20.2-CDH3B4</hadoop.version>
+                <hadoop.version>0.20.2-cdh3u0</hadoop.version>
             </properties>
         </profile>
     </profiles>

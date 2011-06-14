@@ -44,7 +44,8 @@ public class RowParser implements Serializable
         String defaultSerializations = "" +
             "com.ning.metrics.action.hdfs.data.parser.ThriftEnvelopeRowSerializer," +
             "com.ning.metrics.action.hdfs.data.parser.SmileEnvelopeRowSerializer," +
-            "com.ning.metrics.action.hdfs.data.parser.WritableRowSerializer,";
+            "com.ning.metrics.action.hdfs.data.parser.WritableRowSerializer," +
+            "com.ning.metrics.action.hdfs.data.parser.StringRowSerializer,";
 
         // TODO ServiceLoader
         for (String serializerName : StringUtils.split(defaultSerializations + conf.getRowSerializations(), ",")) {

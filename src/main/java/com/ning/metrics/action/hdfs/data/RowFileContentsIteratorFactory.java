@@ -37,16 +37,13 @@ public class RowFileContentsIteratorFactory
     private final Registrar registrar;
 
     @Inject
-    public RowFileContentsIteratorFactory(
-        RowParser rowParser,
-        Registrar registrar
-    )
+    public RowFileContentsIteratorFactory(final RowParser rowParser, final Registrar registrar)
     {
         this.rowParser = rowParser;
         this.registrar = registrar;
     }
 
-    public Iterator<Row> build(FileSystem fs, Path path, boolean raw) throws IOException
+    public Iterator<Row> build(final FileSystem fs, final Path path, final boolean raw) throws IOException
     {
         try {
             return new RowSequenceFileContentsIterator(
@@ -58,10 +55,15 @@ public class RowFileContentsIteratorFactory
         }
         catch (IOException e) {
             // Not a Sequence file?
-            FSDataInputStream input = fs.open(path);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+            final FSDataInputStream input = fs.open(path);
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 
-            return new RowTextFileContentsIterator(reader);
+            return new RowTextFileContentsIterator(
+                path.toUri().getPath(),
+                rowParser,
+                registrar,
+                reader,
+                raw);
         }
     }
 }
