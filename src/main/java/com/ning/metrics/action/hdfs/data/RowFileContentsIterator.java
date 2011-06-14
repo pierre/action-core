@@ -37,7 +37,7 @@ abstract class RowFileContentsIterator implements Iterator<Row>, Closeable
 {
     static final Logger log = Logger.getLogger(RowFileContentsIterator.class);
 
-    final boolean renderAsRow;
+    final boolean rawContents;
     final String pathname;
     final RowParser rowParser;
     private Row row;
@@ -63,14 +63,14 @@ abstract class RowFileContentsIterator implements Iterator<Row>, Closeable
         this.pathname = pathname;
         this.rowParser = rowParser;
         this.registrar = registrar;
-        this.renderAsRow = rawContents;
+        this.rawContents = rawContents;
     }
 
     @Override
     public boolean hasNext()
     {
         if (row == null) {
-            final Rows newRows = readRows();
+            final Rows newRows = readNextRows();
             if (newRows != null) {
                 batchedRows.addAll(newRows);
             }
@@ -102,7 +102,12 @@ abstract class RowFileContentsIterator implements Iterator<Row>, Closeable
         throw new UnsupportedOperationException("remove not implemented; read-only iterator");
     }
 
-    abstract Rows readRows();
+    /**
+     * Read one or more rows
+     *
+     * @return the next row(s)
+     */
+    abstract Rows readNextRows();
 
     @JsonValue
     @SuppressWarnings({"unchecked", "unused"})

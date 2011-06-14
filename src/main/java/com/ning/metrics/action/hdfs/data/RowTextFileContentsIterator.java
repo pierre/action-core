@@ -20,9 +20,12 @@ import com.ning.metrics.action.hdfs.data.parser.RowParser;
 import com.ning.metrics.action.hdfs.data.schema.DynamicColumnKey;
 import com.ning.metrics.action.hdfs.data.schema.RowSchema;
 import com.ning.metrics.action.schema.Registrar;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,12 +34,13 @@ import java.util.List;
  */
 class RowTextFileContentsIterator extends RowFileContentsIterator
 {
-    private final BufferedReader reader;
+    private final InputStream in;
+    private BufferedReader reader = null;
 
-    public RowTextFileContentsIterator(final String pathname, final RowParser rowParser, final Registrar registrar, final BufferedReader reader, final boolean rawContents)
+    public RowTextFileContentsIterator(final String pathname, final RowParser rowParser, final Registrar registrar, final InputStream in, final boolean rawContents)
     {
         super(pathname, rowParser, registrar, rawContents);
-        this.reader = reader;
+        this.in = in;
     }
 
     @Override
@@ -44,7 +48,12 @@ class RowTextFileContentsIterator extends RowFileContentsIterator
     {
         if (!readerClosed) {
             try {
-                reader.close();
+                if (reader != null) {
+                    reader.close();
+                }
+                else {
+                    in.close();
+                }
                 readerClosed = true;
             }
             catch (IOException e) {
@@ -53,14 +62,32 @@ class RowTextFileContentsIterator extends RowFileContentsIterator
         }
     }
 
+    /**
+     * Read one or more rows
+     *
+     * @return the next row(s)
+     */
     @Override
-    Rows readRows()
+    Rows readNextRows()
     {
         try {
             if (readerClosed) {
                 return null;
             }
             else {
+                if (reader == null) {
+                    // First time we come here
+                    // If the file needs to be read as a whole (e.g. Smile), read the whole thing, otherwise read line by line
+                    if (readByLine()) {
+                        this.reader = new BufferedReader(new InputStreamReader(in));
+                    }
+                    else {
+                        final Rows rows = rowParser.streamToRows(registrar, pathname, in);
+                        close(); // Everything has been deserialized, nothing left to do here
+                        return rows;
+                    }
+                }
+
                 Rows rows = new Rows();
                 final String value = reader.readLine();
 
@@ -69,7 +96,7 @@ class RowTextFileContentsIterator extends RowFileContentsIterator
                     return rows;
                 }
 
-                if (renderAsRow) {
+                if (rawContents) {
                     final List<String> list = new ArrayList<String>();
                     list.add(value);
                     rows.add(RowFactory.getRow(new RowSchema("ad-hoc", new DynamicColumnKey("record")), list));
@@ -88,5 +115,16 @@ class RowTextFileContentsIterator extends RowFileContentsIterator
 
             return null;
         }
+    }
+
+    /**
+     * @return true if we can read the file line by line, false otherwise
+     */
+    private boolean readByLine()
+    {
+        final String[] tokenizedPathname = StringUtils.split(pathname, ".");
+        final String suffix = tokenizedPathname[tokenizedPathname.length - 1];
+
+        return !suffix.equals("smile") && !suffix.equals("thrift");
     }
 }

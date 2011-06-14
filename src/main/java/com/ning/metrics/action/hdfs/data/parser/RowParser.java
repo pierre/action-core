@@ -24,31 +24,32 @@ import com.ning.metrics.action.schema.Registrar;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import java.io.InputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RowParser implements Serializable
 {
-    private List<RowSerializer> serializations = new ArrayList<RowSerializer>();
-    private final Logger log = Logger.getLogger(RowParser.class);
+    private static final Logger log = Logger.getLogger(RowParser.class);
+
+    private final Map<String, RowSerializer> serializations = new HashMap<String, RowSerializer>();
     private final ClassLoader classLoader;
 
     @Inject
-    public RowParser(
-        ActionCoreConfig conf
-    )
+    public RowParser(final ActionCoreConfig conf)
     {
         classLoader = RowParser.class.getClassLoader();
 
-        String defaultSerializations = "" +
+        final String defaultSerializations = "" +
             "com.ning.metrics.action.hdfs.data.parser.ThriftEnvelopeRowSerializer," +
-            "com.ning.metrics.action.hdfs.data.parser.SmileEnvelopeRowSerializer," +
+            "com.ning.metrics.action.hdfs.data.parser.ThriftRowSerializer," +
+            "com.ning.metrics.action.hdfs.data.parser.SmileRowSerializer," +
             "com.ning.metrics.action.hdfs.data.parser.WritableRowSerializer," +
             "com.ning.metrics.action.hdfs.data.parser.StringRowSerializer,";
 
         // TODO ServiceLoader
-        for (String serializerName : StringUtils.split(defaultSerializations + conf.getRowSerializations(), ",")) {
+        for (final String serializerName : StringUtils.split(defaultSerializations + conf.getRowSerializations(), ",")) {
             try {
                 add(serializerName);
             }
@@ -65,19 +66,51 @@ public class RowParser implements Serializable
     }
 
     @SuppressWarnings("unchecked")
-    private void add(String serializationName) throws ClassNotFoundException, IllegalAccessException, InstantiationException
+    private void add(final String serializationName) throws ClassNotFoundException, IllegalAccessException, InstantiationException
     {
-        Class<? extends RowSerializer> serializionClass = (Class<? extends RowSerializer>) Class.forName(serializationName, true, classLoader);
-        serializations.add(serializionClass.newInstance());
+        final Class<? extends RowSerializer> serializionClass = (Class<? extends RowSerializer>) Class.forName(serializationName, true, classLoader);
+        serializations.put(serializationName, serializionClass.newInstance());
     }
 
-    public Rows valueToRows(Registrar r, Object c) throws RowAccessException
+    /**
+     * Given a line (or an object in a SequenceFile) in a file, deserialize it into a list of rows
+     *
+     * @param r    Registrar, to match with schema
+     * @param line payload to deserialize
+     * @return Rows, list of Row
+     * @throws RowAccessException if we don't know how to deserialize the line
+     */
+    public Rows valueToRows(final Registrar r, final Object line) throws RowAccessException
     {
-        for (RowSerializer serialization : serializations) {
-            if (serialization.accept(c)) {
-                return serialization.toRows(r, c);
+        for (final RowSerializer serialization : serializations.values()) {
+            if (serialization.accept(line)) {
+                return serialization.toRows(r, line);
             }
         }
-        throw new RowAccessException(String.format("unknown class type: %s", c.getClass().getName()));
+        throw new RowAccessException(String.format("unknown class type: %s", line.getClass().getName()));
+    }
+
+    /**
+     * Given a stream (e.g. raw Smile or Thrift), deserialize it into a list of rows
+     *
+     * @param registrar Registrar, to match with schema
+     * @param pathname  full filename, useful to infer the serialization format
+     * @param in        stream to deserialize
+     * @return list of Row
+     * @throws RowAccessException if we don't know how to deserialize the line
+     */
+    public Rows streamToRows(final Registrar registrar, final String pathname, final InputStream in) throws RowAccessException
+    {
+        final String[] tokenizedPathname = StringUtils.split(pathname, ".");
+        final String suffix = tokenizedPathname[tokenizedPathname.length - 1];
+
+        if (suffix.equals("smile")) {
+            return serializations.get("com.ning.metrics.action.hdfs.data.parser.SmileRowSerializer").toRows(registrar, in);
+        }
+        else if (suffix.equals("thrift")) {
+            return serializations.get("com.ning.metrics.action.hdfs.data.parser.ThriftRowSerializer").toRows(registrar, in);
+        }
+
+        throw new RowAccessException(String.format("unknown file type: %s", suffix));
     }
 }

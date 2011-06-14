@@ -27,7 +27,6 @@ import com.ning.metrics.action.schema.Registrar;
 import com.ning.metrics.goodwill.access.GoodwillSchemaField;
 import com.ning.metrics.serialization.event.SmileEnvelopeEvent;
 import com.ning.metrics.serialization.smile.SmileEnvelopeEventDeserializer;
-import com.ning.metrics.serialization.smile.SmileOutputStream;
 import org.codehaus.jackson.JsonNode;
 
 import java.io.IOException;
@@ -37,15 +36,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class SmileEnvelopeRowSerializer implements RowSerializer
+/**
+ * Given a file in raw Smile format, extract SmileEnvelopeEvents
+ */
+public class SmileRowSerializer implements RowSerializer
 {
     @Override
-    public boolean accept(Object o)
+    public boolean accept(final Object o)
     {
-        // Objects are not SmileEnvelope!
-        // The client send SmileEnvelope via the eventtracker library, however we buffer
-        // Smile events under the cover to leverage Smile back-references.
-        return (o instanceof SmileOutputStream);
+        return (o instanceof InputStream);
     }
 
     @Override
@@ -61,7 +60,7 @@ public class SmileEnvelopeRowSerializer implements RowSerializer
 
         final Rows rows = new Rows();
         while (deserializer.hasNextEvent()) {
-            SmileEnvelopeEvent event;
+            final SmileEnvelopeEvent event;
             try {
                 event = deserializer.getNextEvent();
             }

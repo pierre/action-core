@@ -25,9 +25,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Iterator;
 
 @Singleton
@@ -56,13 +54,12 @@ public class RowFileContentsIteratorFactory
         catch (IOException e) {
             // Not a Sequence file?
             final FSDataInputStream input = fs.open(path);
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 
             return new RowTextFileContentsIterator(
                 path.toUri().getPath(),
                 rowParser,
                 registrar,
-                reader,
+                input,
                 raw);
         }
     }

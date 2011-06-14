@@ -50,8 +50,13 @@ class RowSequenceFileContentsIterator extends RowFileContentsIterator
         }
     }
 
+    /**
+     * Read one or more rows
+     *
+     * @return the next row(s)
+     */
     @Override
-    Rows readRows()
+    Rows readNextRows()
     {
         try {
             if (readerClosed) {
@@ -71,7 +76,7 @@ class RowSequenceFileContentsIterator extends RowFileContentsIterator
                         return rows;
                     }
 
-                    if (renderAsRow) {
+                    if (rawContents) {
                         final List<String> list = new ArrayList<String>();
                         list.add(value.toString());
                         rows.add(RowFactory.getRow(new RowSchema("ad-hoc", new DynamicColumnKey("record")), list));
