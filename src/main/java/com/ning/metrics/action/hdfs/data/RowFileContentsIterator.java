@@ -16,16 +16,13 @@
 
 package com.ning.metrics.action.hdfs.data;
 
-import com.google.common.collect.ImmutableMap;
 import com.ning.metrics.action.hdfs.data.parser.RowParser;
 import com.ning.metrics.action.schema.Registrar;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.annotate.JsonValue;
 
 import java.io.Closeable;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -108,20 +105,4 @@ abstract class RowFileContentsIterator implements Iterator<Row>, Closeable
      * @return the next row(s)
      */
     abstract Rows readNextRows();
-
-    @JsonValue
-    @SuppressWarnings({"unchecked", "unused"})
-    public ImmutableMap toMap()
-    {
-        final ArrayList<Row> rows = new ArrayList<Row>();
-
-        while (hasNext()) {
-            rows.add(next());
-        }
-
-        return new ImmutableMap.Builder()
-            .put(JSON_CONTENT_PATH, pathname)
-            .put(JSON_CONTENT_ENTRIES, rows)
-            .build();
-    }
 }

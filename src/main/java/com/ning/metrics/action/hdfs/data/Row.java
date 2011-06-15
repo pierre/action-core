@@ -40,7 +40,7 @@ import java.util.List;
  */
 public abstract class Row<T extends Comparable, Serializable> implements WritableComparable
 {
-    protected final static JsonFactory jsonFactory = new JsonFactory();
+    protected static final JsonFactory jsonFactory = new JsonFactory();
     private static final ObjectMapper jsonObjectMapper = new ObjectMapper(jsonFactory);
 
     public static final String JSON_ROW_ENTRIES = "entries";
