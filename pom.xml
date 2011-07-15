@@ -209,18 +209,18 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jul-to-slf4j</artifactId>
-            <version>1.6.1</version>
+            <version>1.5.11</version>
         </dependency>
         <dependency><!-- Needed for generated Scribe and Thrift classes -->
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.6.1</version>
+            <version>1.5.11</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>1.6.1</version>
+            <version>1.5.11</version>
             <scope>runtime</scope>
         </dependency>
     </dependencies>
@@ -372,7 +372,7 @@
                         <groupId>org.slf4j</groupId>
                         <artifactId>slf4j-log4j12</artifactId>
                         <!-- Has to match jetty's version, see http://www.slf4j.org/faq.html#IllegalAccessError -->
-                        <version>[1.3.1]</version>
+                        <version>1.5.11</version>
                     </dependency>
                     <dependency>
                         <groupId>log4j</groupId>
