@@ -39,13 +39,11 @@ import java.util.LinkedHashMap;
 @Path("/rest/1.0")
 public class HdfsBrowser
 {
-    private HdfsReaderEndPoint hdfsReader;
-    private Logger log = Logger.getLogger(HdfsBrowser.class);
+    private final HdfsReaderEndPoint hdfsReader;
+    private final Logger log = Logger.getLogger(HdfsBrowser.class);
 
     @Inject
-    public HdfsBrowser(
-        HdfsReaderEndPoint store
-    )
+    public HdfsBrowser(final HdfsReaderEndPoint store)
     {
         this.hdfsReader = store;
     }
@@ -54,7 +52,6 @@ public class HdfsBrowser
      * Build a Viewable to browse HDFS.
      *
      * @param path      path in HDFS to render (directory listing or file), defaults to /
-     * @param range     optional, bucket of lines to read (e.g. 200-250) (used in the content.jsp only)
      * @param raw       optional, whether to try to deserialize
      * @param recursive optional, whether to crawl all files under a directory
      * @return Viewable to render the jsp
@@ -65,9 +62,8 @@ public class HdfsBrowser
     @Produces({"text/html", "text/plain"})
     public Viewable getListing(
         @QueryParam("path") String path,
-        @QueryParam("range") String range,
-        @QueryParam("raw") boolean raw,
-        @QueryParam("recursive") boolean recursive
+        @QueryParam("raw") final boolean raw,
+        @QueryParam("recursive") final boolean recursive
     ) throws IOException
     {
         log.debug(String.format("Got request for path=[%s], raw=[%s] and recursive=[%s]", path, raw, recursive));
@@ -93,19 +89,19 @@ public class HdfsBrowser
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/json")
     public Response listingToJson(
-        @QueryParam("path") String path,
-        @QueryParam("recursive") boolean recursive,
-        @QueryParam("pretty") boolean pretty,
-        @QueryParam("raw") boolean raw
+        @QueryParam("path") final String path,
+        @QueryParam("recursive") final boolean recursive,
+        @QueryParam("pretty") final boolean pretty,
+        @QueryParam("raw") final boolean raw
     ) throws IOException
     {
         final HdfsListing hdfsListing = hdfsReader.getListing(path, raw, recursive);
 
         if (pretty) {
-            ObjectMapper mapper = new ObjectMapper();
+            final ObjectMapper mapper = new ObjectMapper();
             mapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
 
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            final ByteArrayOutputStream out = new ByteArrayOutputStream();
             mapper.writeValue(out, hdfsListing.toMap());
 
             return Response.ok().entity(new String(out.toByteArray())).build();
@@ -118,8 +114,8 @@ public class HdfsBrowser
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/text")
     public Viewable dirToJson(
-        @QueryParam("path") String path,
-        @QueryParam("recursive") boolean recursive
+        @QueryParam("path") final String path,
+        @QueryParam("recursive") final boolean recursive
     ) throws IOException
     {
         return new Viewable("/rest/contentRaw.jsp", hdfsReader.getListing(path, true, recursive));
@@ -128,17 +124,16 @@ public class HdfsBrowser
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/viewer")
-    public Response prettyPrintOneLine(
-        @QueryParam("object") String object) throws IOException
+    public Response prettyPrintOneLine(@QueryParam("object") final String object) throws IOException
     {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        ObjectMapper mapper = new ObjectMapper();
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final ObjectMapper mapper = new ObjectMapper();
 
-        String objectURIDecoded = URLDecoder.decode(object, "UTF-8");
-        byte[] objectBase64Decoded = Base64.decodeBase64(objectURIDecoded.getBytes());
+        final String objectURIDecoded = URLDecoder.decode(object, "UTF-8");
+        final byte[] objectBase64Decoded = Base64.decodeBase64(objectURIDecoded.getBytes());
 
         mapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
-        LinkedHashMap map = mapper.readValue(new String(objectBase64Decoded), LinkedHashMap.class);
+        final LinkedHashMap map = mapper.readValue(new String(objectBase64Decoded), LinkedHashMap.class);
 
         // We need to re-serialize the json (pretty print works only on serialization)
         mapper.writeValue(out, map);
