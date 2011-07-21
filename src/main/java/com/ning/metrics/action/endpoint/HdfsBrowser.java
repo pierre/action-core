@@ -17,35 +17,58 @@
 package com.ning.metrics.action.endpoint;
 
 import com.google.inject.Inject;
+import com.ning.metrics.action.binder.config.ActionCoreConfig;
 import com.ning.metrics.action.hdfs.reader.HdfsListing;
 import com.ning.metrics.action.hdfs.reader.HdfsReaderEndPoint;
+import com.ning.metrics.action.hdfs.writer.HdfsWriter;
 import com.sun.jersey.api.view.Viewable;
+import com.yammer.metrics.guice.Timed;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.util.LinkedHashMap;
 
 @Path("/rest/1.0")
 public class HdfsBrowser
 {
-    private final HdfsReaderEndPoint hdfsReader;
     private final Logger log = Logger.getLogger(HdfsBrowser.class);
 
+    private static final ObjectMapper mapper = new ObjectMapper();
+
+    private final ActionCoreConfig config;
+    private final HdfsReaderEndPoint hdfsReader;
+    private final HdfsWriter hdfsWriter;
+    private final CacheControl cacheControl;
+
     @Inject
-    public HdfsBrowser(final HdfsReaderEndPoint store)
+    public HdfsBrowser(final ActionCoreConfig config, final HdfsReaderEndPoint store, final HdfsWriter writer)
     {
+        this.config = config;
         this.hdfsReader = store;
+        this.hdfsWriter = writer;
+
+        cacheControl = new CacheControl();
+        cacheControl.setPrivate(true);
+        cacheControl.setNoCache(true);
+        cacheControl.setProxyRevalidate(true);
     }
 
     /**
@@ -60,6 +83,7 @@ public class HdfsBrowser
     @GET
     @Path("/hdfs")
     @Produces({"text/html", "text/plain"})
+    @Timed
     public Viewable getListing(
         @QueryParam("path") String path,
         @QueryParam("raw") final boolean raw,
@@ -88,6 +112,7 @@ public class HdfsBrowser
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/json")
+    @Timed
     public Response listingToJson(
         @QueryParam("path") final String path,
         @QueryParam("recursive") final boolean recursive,
@@ -98,7 +123,6 @@ public class HdfsBrowser
         final HdfsListing hdfsListing = hdfsReader.getListing(path, raw, recursive);
 
         if (pretty) {
-            final ObjectMapper mapper = new ObjectMapper();
             mapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
 
             final ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -113,6 +137,7 @@ public class HdfsBrowser
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/text")
+    @Timed
     public Viewable dirToJson(
         @QueryParam("path") final String path,
         @QueryParam("recursive") final boolean recursive
@@ -124,6 +149,7 @@ public class HdfsBrowser
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/viewer")
+    @Timed
     public Response prettyPrintOneLine(@QueryParam("object") final String object) throws IOException
     {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -139,5 +165,50 @@ public class HdfsBrowser
         mapper.writeValue(out, map);
 
         return Response.ok().entity(new String(out.toByteArray())).build();
+    }
+
+    @POST
+    @Produces(MediaType.TEXT_PLAIN)
+    @Timed
+    public Response upload(
+        final InputStream body,
+        @QueryParam("path") final String outputPath,
+        @QueryParam("overwrite") @DefaultValue("false") final boolean overwrite,
+        @QueryParam("replication") @DefaultValue("3") final short replication,
+        @QueryParam("overwrite") @DefaultValue("-1") long blocksize,
+        // Either in octal or symbolic format
+        @QueryParam("permission") @DefaultValue("u=rw,go=r") final String permission
+    ) throws IOException
+    {
+        if (blocksize == -1) {
+            blocksize = config.getHadoopBlockSize();
+        }
+
+        try {
+            final URI path = hdfsWriter.write(body, outputPath, overwrite, replication, blocksize, permission);
+            return Response.created(path).build();
+        }
+        catch (IOException e) {
+            // Stupid hadoop, puts the stacktrace in the message
+            final String message = StringUtils.split(e.getMessage(), '\n')[0];
+            log.warn(String.format("Unable to create [%s]: %s", outputPath, message));
+            return Response.serverError().header("Warning", "199 " + message).cacheControl(cacheControl).build();
+        }
+    }
+
+    @DELETE
+    @Produces(MediaType.TEXT_PLAIN)
+    @Timed
+    public Response delete(@QueryParam("path") final String outputPath, @QueryParam("recursive") @DefaultValue("false") final boolean recursive) throws IOException
+    {
+        try {
+            hdfsWriter.delete(outputPath, recursive);
+            return Response.ok().build();
+        }
+        catch (IOException e) {
+            final String message = StringUtils.split(e.getMessage(), '\n')[0];
+            log.warn(String.format("Unable to delete [%s]: %s", outputPath, message));
+            return Response.serverError().header("Warning", "199 " + message).cacheControl(cacheControl).build();
+        }
     }
 }
