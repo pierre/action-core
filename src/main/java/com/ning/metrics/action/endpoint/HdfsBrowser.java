@@ -175,7 +175,7 @@ public class HdfsBrowser
         @QueryParam("path") final String outputPath,
         @QueryParam("overwrite") @DefaultValue("false") final boolean overwrite,
         @QueryParam("replication") @DefaultValue("3") final short replication,
-        @QueryParam("overwrite") @DefaultValue("-1") long blocksize,
+        @QueryParam("blocksize") @DefaultValue("-1") long blocksize,
         // Either in octal or symbolic format
         @QueryParam("permission") @DefaultValue("u=rw,go=r") final String permission
     ) throws IOException
