@@ -29,6 +29,11 @@ public interface ActionCoreConfig
     @Default("hadoop,hadoop")
     String getHadoopUgi();
 
+    @Config("action.hadoop.socket.timeout")
+    // 5 minutes
+    @Default("300000")
+    int getHadoopSocketTimeOut();
+
     @Config("sction.hadoop.block.size")
     @Default("134217728")
     long getHadoopBlockSize();

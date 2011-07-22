@@ -45,6 +45,8 @@ class FileSystemAccessProvider implements Provider<FileSystemAccess>
             hadoopConfig.set("fs.default.name", hfsHost);
         }
 
+        // Bump the default timeout
+        hadoopConfig.setInt("dfs.socket.timeout", actionCoreConfig.getHadoopSocketTimeOut());
         hadoopConfig.setBoolean("fs.automatic.close", false);
         hadoopConfig.setLong("dfs.block.size", actionCoreConfig.getHadoopBlockSize());
         hadoopConfig.set("hadoop.job.ugi", actionCoreConfig.getHadoopUgi());
