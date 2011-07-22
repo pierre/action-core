@@ -50,10 +50,12 @@ public class HdfsWriter
         final String permission
     ) throws IOException
     {
+        final long start = System.nanoTime();
         log.info(String.format("Writing to HDFS: %s", outputPath));
-        final Path hdfsPath = new Path(outputPath);
 
+        final Path hdfsPath = new Path(outputPath);
         FSDataOutputStream outputStream = null;
+        int bytesWritten = 0;
         try {
             new FsPermission(permission);
             outputStream = fileSystemAccess.get().create(hdfsPath, new FsPermission(permission), overwrite,
@@ -63,6 +65,7 @@ public class HdfsWriter
             int bytesRead;
             while ((bytesRead = inputStream.read(buffer)) > 0) {
                 outputStream.write(buffer, 0, bytesRead);
+                bytesWritten += bytesRead;
             }
 
             // GC-ready
@@ -74,6 +77,9 @@ public class HdfsWriter
                 outputStream.close();
             }
         }
+
+        final long end = System.nanoTime();
+        log.info(String.format("Written %.3f Mb in %d sec. to %s", (double) bytesWritten / (1024 * 1024), (end - start) / 1000000000, outputPath));
 
         return hdfsPath.toUri();
     }
