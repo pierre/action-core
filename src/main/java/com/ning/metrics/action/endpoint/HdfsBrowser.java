@@ -180,6 +180,10 @@ public class HdfsBrowser
         @QueryParam("permission") @DefaultValue("u=rw,go=r") final String permission
     ) throws IOException
     {
+        if (outputPath == null) {
+            return Response.status(Response.Status.BAD_REQUEST).header("Warning", "199 " + "path cannot be null").cacheControl(cacheControl).build();
+        }
+
         if (blocksize == -1) {
             blocksize = config.getHadoopBlockSize();
         }
@@ -189,8 +193,15 @@ public class HdfsBrowser
             return Response.created(path).build();
         }
         catch (IOException e) {
-            // Stupid hadoop, puts the stacktrace in the message
-            final String message = StringUtils.split(e.getMessage(), '\n')[0];
+            final String message;
+            if (e.getMessage() != null) {
+                // Stupid hadoop, puts the stacktrace in the message
+                message = StringUtils.split(e.getMessage(), '\n')[0];
+            }
+            else {
+                message = e.toString();
+            }
+
             log.warn(String.format("Unable to create [%s]: %s", outputPath, message));
             return Response.serverError().header("Warning", "199 " + message).cacheControl(cacheControl).build();
         }
