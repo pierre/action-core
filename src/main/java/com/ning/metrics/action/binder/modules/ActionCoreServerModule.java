@@ -26,6 +26,7 @@ import com.ning.metrics.action.hdfs.data.RowFileContentsIteratorFactory;
 import com.ning.metrics.action.schema.GoodwillRegistrar;
 import com.ning.metrics.action.schema.Registrar;
 import com.sun.jersey.api.core.PackagesResourceConfig;
+import com.yammer.metrics.guice.InstrumentationModule;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import org.skife.config.ConfigurationObjectFactory;
 
@@ -54,6 +55,9 @@ public class ActionCoreServerModule extends ServletModule
                 bind(JacksonJsonProvider.class).asEagerSingleton();
             }
         });
+
+        // Metrics
+        install(new InstrumentationModule());
 
         install(new HdfsModule());
 
