@@ -228,10 +228,19 @@
         <profile>
             <id>cloudera</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <properties>
                 <hadoop.version>0.20.2-cdh3u0</hadoop.version>
+            </properties>
+        </profile>
+         <profile>
+            <id>apache</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <hadoop.version>0.20.2</hadoop.version>
             </properties>
         </profile>
     </profiles>
