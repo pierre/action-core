@@ -17,55 +17,44 @@
 package com.ning.metrics.action.binder.config;
 
 import org.skife.config.Config;
+import org.skife.config.Default;
 
-public class ActionCoreConfig
+public interface ActionCoreConfig
 {
-    @Config(value = "action.hadoop.namenode.url")
-    public String getNamenodeUrl()
-    {
-        return "hdfs://127.0.0.1:9000";
-    }
+    @Config("action.hadoop.namenode.url")
+    @Default("hdfs://127.0.0.1:9000")
+    String getNamenodeUrl();
 
-    @Config(value = "action.hadoop.ugi")
-    public String getHadoopUgi()
-    {
-        return "hadoop,hadoop";
-    }
+    @Config("action.hadoop.ugi")
+    @Default("hadoop,hadoop")
+    String getHadoopUgi();
 
-    @Config(value = "action.hadoop.path")
-    public String getPath()
-    {
-        return "/";
-    }
+    @Config("action.hadoop.socket.timeout")
+    // 5 minutes
+    @Default("300000")
+    int getHadoopSocketTimeOut();
 
-    @Config(value = "action.hadoop.io.row.serializations")
-    public String getRowSerializations()
-    {
-        return "";
-    }
+    @Config("sction.hadoop.block.size")
+    @Default("134217728")
+    long getHadoopBlockSize();
 
-    @Config(value = "action.hadoop.io.serializations")
-    public String getSerializations()
-    {
-        return "org.apache.hadoop.io.serializer.WritableSerialization";
-    }
+    @Config("action.hadoop.io.row.serializations")
+    @Default("")
+    String getRowSerializations();
 
-    @Config(value = "action.registrar.host")
-    public String getRegistrarHost()
-    {
-        return "127.0.0.1";
-    }
+    @Config("action.hadoop.io.serializations")
+    @Default("org.apache.hadoop.io.serializer.WritableSerialization")
+    String getSerializations();
 
+    @Config("action.registrar.host")
+    @Default("127.0.0.1")
+    String getRegistrarHost();
 
-    @Config(value = "action.registrar.port")
-    public int getRegistrarPort()
-    {
-        return 8081;
-    }
+    @Config("action.registrar.port")
+    @Default("8081")
+    int getRegistrarPort();
 
-    @Config(value = "action.regisrtar.file")
-    public String getRegistrarStateFile()
-    {
-        return "/tmp/action/registrar/cache.ondisk";
-    }
+    @Config("action.registrar.file")
+    @Default(".registrar.cache")
+    String getRegistrarStateFile();
 }
