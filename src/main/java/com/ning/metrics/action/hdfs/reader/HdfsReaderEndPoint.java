@@ -17,27 +17,50 @@
 package com.ning.metrics.action.hdfs.reader;
 
 import com.google.inject.Inject;
+import com.ning.metrics.action.binder.config.ActionCoreConfig;
 import com.ning.metrics.action.hdfs.data.RowFileContentsIteratorFactory;
-import com.ning.metrics.serialization.hadoop.FileSystemAccess;
+import com.ning.metrics.serialization.hadoop.HadoopSmileOutputStreamSerialization;
+import com.ning.metrics.serialization.hadoop.HadoopThriftEnvelopeSerialization;
+import com.ning.metrics.serialization.hadoop.HadoopThriftWritableSerialization;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 
 public class HdfsReaderEndPoint
 {
-    private final FileSystemAccess fileSystemAccess;
+    private static final Logger log = Logger.getLogger(HdfsReaderEndPoint.class);
+
+    private final FileSystem fileSystem;
     private final RowFileContentsIteratorFactory rowFileContentsIteratorFactory;
 
     @Inject
-    public HdfsReaderEndPoint(final RowFileContentsIteratorFactory rowFileContentsIteratorFactory, final FileSystemAccess fileSystemAccess) throws IOException
+    public HdfsReaderEndPoint(
+        RowFileContentsIteratorFactory rowFileContentsIteratorFactory,
+        ActionCoreConfig config
+    ) throws IOException
     {
         this.rowFileContentsIteratorFactory = rowFileContentsIteratorFactory;
-        this.fileSystemAccess = fileSystemAccess;
+        Configuration conf = new Configuration();
+
+        conf.set("fs.default.name", config.getNamenodeUrl());
+        conf.set("hadoop.job.ugi", config.getHadoopUgi());
+        conf.setStrings("io.serializations", HadoopThriftWritableSerialization.class.getName(),
+            HadoopThriftEnvelopeSerialization.class.getName(),
+            HadoopSmileOutputStreamSerialization.class.getName(),
+            "org.apache.hadoop.io.serializer.WritableSerialization",
+            config.getSerializations());
+
+        this.fileSystem = FileSystem.get(conf);
+
+        log.debug("Connected successfully to HDFS!");
     }
 
-    public boolean isDir(final String path) throws IOException
+    public boolean isDir(String path) throws IOException
     {
-        return !fileSystemAccess.get().isFile(new Path(path));
+        return !fileSystem.isFile(new Path(path));
     }
 
     /**
@@ -47,7 +70,7 @@ public class HdfsReaderEndPoint
      * @return HdfsListing containing entries in the directory
      * @throws IOException HDFS crawling error
      */
-    public HdfsListing getListing(final String dir) throws IOException
+    public HdfsListing getListing(String dir) throws IOException
     {
         return getListing(dir, false, false);
     }
@@ -61,8 +84,8 @@ public class HdfsReaderEndPoint
      * @return HdfsListing containing entries in the directory
      * @throws java.io.IOException
      */
-    public HdfsListing getListing(final String path, final boolean raw, final boolean recursive) throws IOException
+    public HdfsListing getListing(String path, boolean raw, boolean recursive) throws IOException
     {
-        return new HdfsListing(fileSystemAccess.get(), new Path(path), raw, rowFileContentsIteratorFactory, recursive);
+        return new HdfsListing(fileSystem, new Path(path), raw, rowFileContentsIteratorFactory, recursive);
     }
 }
