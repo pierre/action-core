@@ -26,8 +26,12 @@ import com.ning.metrics.action.hdfs.data.RowFileContentsIteratorFactory;
 import com.ning.metrics.action.schema.GoodwillRegistrar;
 import com.ning.metrics.action.schema.Registrar;
 import com.sun.jersey.api.core.PackagesResourceConfig;
+import com.yammer.metrics.guice.InstrumentationModule;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import org.skife.config.ConfigurationObjectFactory;
+
+import javax.management.MBeanServer;
+import java.lang.management.ManagementFactory;
 
 public class ActionCoreServerModule extends ServletModule
 {
@@ -37,10 +41,13 @@ public class ActionCoreServerModule extends ServletModule
         install(new Module()
         {
             @Override
-            public void configure(Binder binder)
+            public void configure(final Binder binder)
             {
-                ActionCoreConfig config = new ConfigurationObjectFactory(System.getProperties()).build(ActionCoreConfig.class);
+                final ActionCoreConfig config = new ConfigurationObjectFactory(System.getProperties()).build(ActionCoreConfig.class);
                 binder.bind(ActionCoreConfig.class).toInstance(config);
+
+                binder.bind(MBeanServer.class).toInstance(ManagementFactory.getPlatformMBeanServer());
+
                 binder.bind(RowFileContentsIteratorFactory.class).asEagerSingleton();
                 binder.bind(Registrar.class).to(GoodwillRegistrar.class).asEagerSingleton();
 
@@ -48,6 +55,11 @@ public class ActionCoreServerModule extends ServletModule
                 bind(JacksonJsonProvider.class).asEagerSingleton();
             }
         });
+
+        // Metrics
+        install(new InstrumentationModule());
+
+        install(new HdfsModule());
 
         // TODO: add these filters
         // ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS, GZIPContentEncodingFilter.class.getName(),
