@@ -18,7 +18,7 @@ package com.ning.metrics.action.schema;
 
 import com.google.inject.Inject;
 import com.ning.metrics.action.binder.config.ActionCoreConfig;
-import com.ning.metrics.goodwill.access.GoodwillAccessor;
+import com.ning.metrics.goodwill.access.CachingGoodwillAccessor;
 import com.ning.metrics.goodwill.access.GoodwillSchema;
 import com.ning.metrics.goodwill.access.GoodwillSchemaField;
 
@@ -29,46 +29,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 public class GoodwillRegistrar implements Registrar
 {
-    private final GoodwillAccessor goodwillAccessor;
+    private final CachingGoodwillAccessor goodwillAccessor;
 
     @Inject
-    public GoodwillRegistrar(
-        ActionCoreConfig config
-    ) throws IOException, ExecutionException, InterruptedException
+    public GoodwillRegistrar(ActionCoreConfig config) throws IOException, ExecutionException, InterruptedException
     {
         String host = config.getRegistrarHost();
         int port = config.getRegistrarPort();
 
-        goodwillAccessor = new GoodwillAccessor(host, port);
+        goodwillAccessor = new CachingGoodwillAccessor(host, port);
     }
 
     @Override
     public String getCanonicalName(String type)
     {
-        try {
-            Future<GoodwillSchema> schemaFuture = goodwillAccessor.getSchema(type);
-            // IOException
-            if (schemaFuture == null) {
-                return null;
-            }
+        GoodwillSchema goodwillSchema = goodwillAccessor.getSchema(type);
 
-            GoodwillSchema goodwillSchema = schemaFuture.get();
-            if (goodwillSchema != null) {
-                return goodwillSchema.getName();
-            }
-            else {
-                return null;
-            }
+        if (goodwillSchema != null) {
+            return goodwillSchema.getName();
         }
-        catch (InterruptedException e) {
-            throw new RuntimeException(String.format("Was interrupted while getting schema: %s", type), e);
-        }
-        catch (ExecutionException e) {
-            throw new RuntimeException(String.format("Problem getting schema: %s", type), e);
+        else {
+            return null;
         }
     }
 
@@ -77,23 +61,9 @@ public class GoodwillRegistrar implements Registrar
     {
         Collection<String> result = new ArrayList<String>();
 
-        try {
-            Future<List<GoodwillSchema>> schemataFuture = goodwillAccessor.getSchemata();
-            // IOException
-            if (schemataFuture == null) {
-                return null;
-            }
-
-            List<GoodwillSchema> goodwillSchemata = schemataFuture.get();
-            for (GoodwillSchema goodwillSchema : goodwillSchemata) {
-                result.add(goodwillSchema.getName());
-            }
-        }
-        catch (InterruptedException e) {
-            throw new RuntimeException("Was interrupted while getting the list of schemata", e);
-        }
-        catch (ExecutionException e) {
-            throw new RuntimeException("Problem getting the list of schemata", e);
+        List<GoodwillSchema> goodwillSchemata = goodwillAccessor.getSchemata();
+        for (GoodwillSchema goodwillSchema : goodwillSchemata) {
+            result.add(goodwillSchema.getName());
         }
 
         return result;
@@ -104,28 +74,14 @@ public class GoodwillRegistrar implements Registrar
     {
         Map<Short, GoodwillSchemaField> result = new HashMap<Short, GoodwillSchemaField>();
 
-        try {
-            Future<GoodwillSchema> schemaFuture = goodwillAccessor.getSchema(type);
-            // IOException
-            if (schemaFuture == null) {
-                return null;
-            }
-
-            GoodwillSchema goodwillSchema = schemaFuture.get();
-            // Schema not found
-            if (goodwillSchema == null) {
-                return null;
-            }
-
-            for (GoodwillSchemaField goodwillField : goodwillSchema.getSchema()) {
-                result.put(goodwillField.getId(), goodwillField);
-            }
+        GoodwillSchema goodwillSchema = goodwillAccessor.getSchema(type);
+        // Schema not found
+        if (goodwillSchema == null) {
+            return null;
         }
-        catch (InterruptedException e) {
-            throw new RuntimeException(String.format("Was interrupted while getting schema: %s", type), e);
-        }
-        catch (ExecutionException e) {
-            throw new RuntimeException(String.format("Problem getting schema: %s", type), e);
+
+        for (GoodwillSchemaField goodwillField : goodwillSchema.getSchema()) {
+            result.put(goodwillField.getId(), goodwillField);
         }
 
         return result;
