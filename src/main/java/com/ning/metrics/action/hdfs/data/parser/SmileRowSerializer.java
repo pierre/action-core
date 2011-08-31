@@ -83,7 +83,7 @@ public class SmileRowSerializer implements RowSerializer
 
                 GoodwillSchemaField schemaField = null;
                 if (schema != null) {
-                    schemaField = schema.get(i);
+                    schemaField = schema.get((short) i);
                 }
 
                 if (schemaField == null) {
