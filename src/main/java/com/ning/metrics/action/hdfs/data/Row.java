@@ -213,7 +213,7 @@ public abstract class Row<T extends Comparable, Serializable> implements Writabl
         StringWriter s = new StringWriter();
         JsonGenerator g = jsonObjectMapper.getJsonFactory().createJsonGenerator(s);
         if (pretty) {
-            g.setPrettyPrinter(new DefaultPrettyPrinter());
+            g.useDefaultPrettyPrinter();
         }
 
         int i = 0;

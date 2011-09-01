@@ -38,6 +38,8 @@ import java.util.Iterator;
  */
 public class HdfsEntry
 {
+    private static final byte DELIMITER = (byte) ',';
+
     private final Path path;
     private final long blockSize;
     private final long size;
@@ -183,15 +185,20 @@ public class HdfsEntry
         generator.writeObjectField(JSON_ENTRY_SIZE, getSize());
         generator.writeObjectField(JSON_ENTRY_REPLICATION, getReplication());
         generator.writeObjectField(JSON_ENTRY_IS_DIR, isDirectory());
+        // Important: need to flush before appending pre-serialized events
+        generator.flush();
 
+        generator.writeArrayFieldStart(JSON_ENTRY_CONTENT);
         if (content != null) {
+            int i = 0;
             while (content.hasNext()) {
-                generator.writeObjectField(JSON_ENTRY_CONTENT, content.next().toJSON(pretty));
+                if (++i > 1) {
+                    out.write(DELIMITER);
+                }
+                generator.writeObject(content.next().toJSON(pretty));
             }
         }
-        else {
-            generator.writeObjectField(JSON_ENTRY_CONTENT, "");
-        }
+        generator.writeEndArray();
 
         generator.writeEndObject();
         generator.close();
