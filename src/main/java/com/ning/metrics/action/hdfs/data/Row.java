@@ -25,6 +25,7 @@ import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.annotate.JsonValue;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.util.DefaultPrettyPrinter;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -218,6 +219,17 @@ public abstract class Row<T extends Comparable, Serializable> implements Writabl
         }
         generator.writeEndObject();
         generator.flush();
+    }
+
+    public String toJSON() throws IOException
+    {
+        final StringWriter s = new StringWriter();
+        final JsonGenerator generator = new JsonFactory().createJsonGenerator(s);
+        generator.setPrettyPrinter(new DefaultPrettyPrinter());
+        toJSON(generator);
+        generator.close();
+
+        return s.toString();
     }
 
     @Override
