@@ -83,7 +83,12 @@ public class HdfsListing
 
     private void findEntries(FileSystem fs, Path p, ImmutableList.Builder<HdfsEntry> entriesBuilder) throws IOException
     {
-        for (final FileStatus s : fs.listStatus(p)) {
+        final FileStatus[] fileStatuses = fs.listStatus(p);
+        if (fileStatuses == null) {
+            return;
+        }
+
+        for (final FileStatus s : fileStatuses) {
             if (s.isDir() && recursive) {
                 findEntries(fs, s.getPath(), entriesBuilder);
             }
