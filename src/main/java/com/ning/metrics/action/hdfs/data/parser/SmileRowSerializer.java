@@ -69,32 +69,29 @@ public class SmileRowSerializer implements RowSerializer
             }
             final JsonNode node = (JsonNode) event.getData();
 
-            final List<JsonNodeComparable> data = new ArrayList<JsonNodeComparable>(node.size());
-            final List<ColumnKey> columnKeyList = new ArrayList<ColumnKey>(node.size());
-
             final Map<Short, GoodwillSchemaField> schema = r.getSchema(event.getName());
+            final List<ColumnKey> columnKeyList = new ArrayList<ColumnKey>(node.size());
+            final List<JsonNodeComparable> data = new ArrayList<JsonNodeComparable>(node.size());
 
-            // TODO Fragile - need field IDs
-            int i = 0;
-            final Iterator it = node.getElements();
-            while (it.hasNext()) {
-                i++;
-                final JsonNode nodeField = (JsonNode) it.next();
-
-                GoodwillSchemaField schemaField = null;
-                if (schema != null) {
-                    schemaField = schema.get((short) i);
+            // Without Goodwill integration, simply pass the raw json
+            if (schema == null) {
+                final Iterator<String> nodeFieldNames = node.getFieldNames();
+                while (nodeFieldNames.hasNext()) {
+                    columnKeyList.add(new DynamicColumnKey(nodeFieldNames.next()));
                 }
 
-                if (schemaField == null) {
-                    columnKeyList.add(new DynamicColumnKey(String.format("%d", i)));
+                final Iterator<JsonNode> nodeElements = node.getElements();
+                while (nodeElements.hasNext()) {
+                    data.add(new JsonNodeComparable(nodeElements.next()));
                 }
-                else {
-                    columnKeyList.add(new DynamicColumnKey(schemaField.getName()));
-
+            }
+            else {
+                // With Goodwill, select only the fields present in the Goodwill schema, and preserve ordering
+                for (final GoodwillSchemaField schemaField : schema.values()) {
+                    final String schemaFieldName = schemaField.getName();
+                    columnKeyList.add(new DynamicColumnKey(schemaFieldName));
+                    data.add(new JsonNodeComparable(node.get(schemaFieldName)));
                 }
-
-                data.add(new JsonNodeComparable(nodeField));
             }
 
             rows.add(RowFactory.getRow(new RowSchema(event.getName(), columnKeyList), data));
