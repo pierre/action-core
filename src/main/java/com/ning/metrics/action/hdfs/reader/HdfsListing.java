@@ -145,12 +145,8 @@ public class HdfsListing
         // Important: need to flush before appending pre-serialized events
         generator.flush();
 
-        int i = 0;
         for (HdfsEntry entry : getEntries()) {
-            if (++i > 1) {
-                out.write(DELIMITER);
-            }
-            entry.toJson(out, pretty);
+            entry.toJson(generator);
         }
         generator.writeEndArray();
 

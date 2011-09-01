@@ -21,11 +21,9 @@ import com.ning.metrics.action.hdfs.data.RowFileContentsIteratorFactory;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.util.DefaultPrettyPrinter;
 import org.joda.time.DateTime;
 
 import java.io.IOException;
@@ -38,8 +36,6 @@ import java.util.Iterator;
  */
 public class HdfsEntry
 {
-    private static final byte DELIMITER = (byte) ',';
-
     private final Path path;
     private final long blockSize;
     private final long size;
@@ -163,19 +159,13 @@ public class HdfsEntry
         return rowFileContentsIteratorFactory.build(fs, path, raw);
     }
 
-    public void toJson(final OutputStream out, final boolean pretty) throws IOException
+    public void toJson(final JsonGenerator generator) throws IOException
     {
         Iterator<Row> content = null;
         try {
             content = getContent();
         }
         catch (IOException ignored) {
-        }
-
-        final JsonGenerator generator = new JsonFactory().createJsonGenerator(out);
-        generator.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
-        if (pretty) {
-            generator.setPrettyPrinter(new DefaultPrettyPrinter());
         }
 
         generator.writeStartObject();
@@ -190,18 +180,14 @@ public class HdfsEntry
 
         generator.writeArrayFieldStart(JSON_ENTRY_CONTENT);
         if (content != null) {
-            int i = 0;
             while (content.hasNext()) {
-                if (++i > 1) {
-                    out.write(DELIMITER);
-                }
-                generator.writeObject(content.next().toJSON(pretty));
+                content.next().toJSON(generator);
             }
         }
         generator.writeEndArray();
 
         generator.writeEndObject();
-        generator.close();
+        generator.flush();
     }
 
     @Override
