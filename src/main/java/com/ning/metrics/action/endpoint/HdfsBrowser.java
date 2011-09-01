@@ -36,12 +36,15 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.util.LinkedHashMap;
@@ -50,8 +53,6 @@ import java.util.LinkedHashMap;
 public class HdfsBrowser
 {
     private final Logger log = Logger.getLogger(HdfsBrowser.class);
-
-    private static final ObjectMapper mapper = new ObjectMapper();
 
     private final ActionCoreConfig config;
     private final HdfsReaderEndPoint hdfsReader;
@@ -113,7 +114,7 @@ public class HdfsBrowser
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/json")
     @Timed
-    public Response listingToJson(
+    public StreamingOutput listingToJson(
         @QueryParam("path") final String path,
         @QueryParam("recursive") final boolean recursive,
         @QueryParam("pretty") final boolean pretty,
@@ -122,16 +123,14 @@ public class HdfsBrowser
     {
         final HdfsListing hdfsListing = hdfsReader.getListing(path, raw, recursive);
 
-        if (pretty) {
-            mapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
-
-            final ByteArrayOutputStream out = new ByteArrayOutputStream();
-            mapper.writeValue(out, hdfsListing.toMap());
-
-            return Response.ok().entity(new String(out.toByteArray())).build();
-        }
-
-        return Response.ok().entity(hdfsListing).build();
+        return new StreamingOutput()
+        {
+            @Override
+            public void write(OutputStream output) throws IOException, WebApplicationException
+            {
+                hdfsListing.toJson(output, pretty);
+            }
+        };
     }
 
     @GET

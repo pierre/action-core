@@ -17,16 +17,18 @@
 package com.ning.metrics.action.hdfs.reader;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.ning.metrics.action.hdfs.data.RowFileContentsIteratorFactory;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.annotate.JsonValue;
+import org.codehaus.jackson.util.DefaultPrettyPrinter;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -36,6 +38,8 @@ import java.util.List;
  */
 public class HdfsListing
 {
+    private static final byte DELIMITER = (byte) ',';
+
     private final Path path;
     private final String parentPath;
     private final ImmutableList<HdfsEntry> entries;
@@ -118,16 +122,35 @@ public class HdfsListing
         return entries;
     }
 
-    @JsonValue
     @SuppressWarnings({"unchecked", "unused"})
-    public ImmutableMap toMap()
+    public void toJson(final OutputStream out, final boolean pretty) throws IOException
     {
         final String parentPath = getParentPath() == null ? "" : getParentPath();
-        return new ImmutableMap.Builder()
-            .put(JSON_LISTING_PATH, getPath())
-            .put(JSON_LISTING_PARENT_PATH, parentPath)
-            .put(JSON_LISTING_ENTRIES, getEntries())
-            .build();
+
+        final JsonGenerator generator = new JsonFactory().createJsonGenerator(out);
+        generator.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
+        if (pretty) {
+            generator.setPrettyPrinter(new DefaultPrettyPrinter());
+        }
+
+        generator.writeStartObject();
+        generator.writeObjectField(JSON_LISTING_PATH, getPath());
+        generator.writeObjectField(JSON_LISTING_PARENT_PATH, parentPath);
+        generator.writeArrayFieldStart(JSON_LISTING_ENTRIES);
+        // Important: need to flush before appending pre-serialized events
+        generator.flush();
+
+        int i = 0;
+        for (HdfsEntry entry : getEntries()) {
+            if (++i > 1) {
+                out.write(DELIMITER);
+            }
+            entry.toJson(out, pretty);
+        }
+        generator.writeEndArray();
+
+        generator.writeEndObject();
+        generator.close();
     }
 
     @Override

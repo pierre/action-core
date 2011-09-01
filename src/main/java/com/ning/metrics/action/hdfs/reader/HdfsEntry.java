@@ -16,18 +16,20 @@
 
 package com.ning.metrics.action.hdfs.reader;
 
-import com.google.common.collect.ImmutableMap;
 import com.ning.metrics.action.hdfs.data.Row;
 import com.ning.metrics.action.hdfs.data.RowFileContentsIteratorFactory;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.annotate.JsonValue;
+import org.codehaus.jackson.util.DefaultPrettyPrinter;
 import org.joda.time.DateTime;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.util.Iterator;
 
@@ -159,9 +161,7 @@ public class HdfsEntry
         return rowFileContentsIteratorFactory.build(fs, path, raw);
     }
 
-    @JsonValue
-    @SuppressWarnings({"unchecked", "unused"})
-    public ImmutableMap toMap()
+    public void toJson(final OutputStream out, final boolean pretty) throws IOException
     {
         Iterator<Row> content = null;
         try {
@@ -170,14 +170,31 @@ public class HdfsEntry
         catch (IOException ignored) {
         }
 
-        return new ImmutableMap.Builder()
-            .put(JSON_ENTRY_PATH, getPath())
-            .put(JSON_ENTRY_MTIME, getModificationDate().getMillis())
-            .put(JSON_ENTRY_SIZE, getSize())
-            .put(JSON_ENTRY_REPLICATION, getReplication())
-            .put(JSON_ENTRY_IS_DIR, isDirectory())
-            .put(JSON_ENTRY_CONTENT, content == null ? "" : content)
-            .build();
+        final JsonGenerator generator = new JsonFactory().createJsonGenerator(out);
+        generator.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
+        if (pretty) {
+            generator.setPrettyPrinter(new DefaultPrettyPrinter());
+        }
+
+        generator.writeStartObject();
+
+        generator.writeObjectField(JSON_ENTRY_PATH, getPath());
+        generator.writeObjectField(JSON_ENTRY_MTIME, getModificationDate().getMillis());
+        generator.writeObjectField(JSON_ENTRY_SIZE, getSize());
+        generator.writeObjectField(JSON_ENTRY_REPLICATION, getReplication());
+        generator.writeObjectField(JSON_ENTRY_IS_DIR, isDirectory());
+
+        if (content != null) {
+            while (content.hasNext()) {
+                generator.writeObjectField(JSON_ENTRY_CONTENT, content.next().toJSON(pretty));
+            }
+        }
+        else {
+            generator.writeObjectField(JSON_ENTRY_CONTENT, "");
+        }
+
+        generator.writeEndObject();
+        generator.close();
     }
 
     @Override
