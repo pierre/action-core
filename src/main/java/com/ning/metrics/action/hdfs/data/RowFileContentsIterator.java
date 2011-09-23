@@ -67,9 +67,12 @@ abstract class RowFileContentsIterator implements Iterator<Row>, Closeable
     public boolean hasNext()
     {
         if (row == null) {
-            final Rows newRows = readNextRows();
-            if (newRows != null) {
-                batchedRows.addAll(newRows);
+            // Make sure not to produce faster than the client can consume
+            if (batchedRows.size() == 0) {
+                final Rows newRows = readNextRows();
+                if (newRows != null) {
+                    batchedRows.addAll(newRows);
+                }
             }
 
             row = batchedRows.poll();

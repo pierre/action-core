@@ -16,6 +16,9 @@
 
 package com.ning.metrics.action.hdfs.data;
 
+import com.ning.metrics.action.hdfs.data.parser.BufferedRowsReader;
+import com.ning.metrics.action.hdfs.data.parser.BufferedSmileReader;
+import com.ning.metrics.action.hdfs.data.parser.BufferedThriftReader;
 import com.ning.metrics.action.hdfs.data.parser.RowParser;
 import com.ning.metrics.action.hdfs.data.schema.DynamicColumnKey;
 import com.ning.metrics.action.hdfs.data.schema.RowSchema;
@@ -35,12 +38,30 @@ import java.util.List;
 class RowTextFileContentsIterator extends RowFileContentsIterator
 {
     private final InputStream in;
-    private BufferedReader reader = null;
+    private final boolean binary;
+    private final BufferedReader reader;
+    private final BufferedRowsReader streamReader;
 
-    public RowTextFileContentsIterator(final String pathname, final RowParser rowParser, final Registrar registrar, final InputStream in, final boolean rawContents)
+    public RowTextFileContentsIterator(final String pathname, final RowParser rowParser, final Registrar registrar, final InputStream in, final boolean rawContents) throws IOException
     {
         super(pathname, rowParser, registrar, rawContents);
         this.in = in;
+        final String[] tokenizedPathname = StringUtils.split(pathname, ".");
+        final String suffix = tokenizedPathname[tokenizedPathname.length - 1];
+
+        binary = suffix.equals("smile") || suffix.equals("thrift");
+        if (suffix.equals("smile")) {
+            reader = null;
+            streamReader = new BufferedSmileReader(registrar, in);
+        }
+        else if (suffix.equals("thrift")) {
+            reader = null;
+            streamReader = new BufferedThriftReader(registrar, in);
+        }
+        else {
+            streamReader = null;
+            reader = new BufferedReader(new InputStreamReader(in));
+        }
     }
 
     @Override
@@ -74,37 +95,16 @@ class RowTextFileContentsIterator extends RowFileContentsIterator
             if (readerClosed) {
                 return null;
             }
+            // Non-binary payload
+            else if (!binary) {
+                return readLine();
+            }
             else {
-                if (reader == null) {
-                    // First time we come here
-                    // If the file needs to be read as a whole (e.g. Smile), read the whole thing, otherwise read line by line
-                    if (readByLine()) {
-                        this.reader = new BufferedReader(new InputStreamReader(in));
-                    }
-                    else {
-                        final Rows rows = rowParser.streamToRows(registrar, pathname, in);
-                        close(); // Everything has been deserialized, nothing left to do here
-                        return rows;
-                    }
-                }
+                final Rows rows = streamReader.readNext();
 
-                Rows rows = new Rows();
-                final String value = reader.readLine();
-
-                if (value == null) {
+                if (rows == null) {
                     close();
-                    return rows;
                 }
-
-                if (rawContents) {
-                    final List<String> list = new ArrayList<String>();
-                    list.add(value);
-                    rows.add(RowFactory.getRow(new RowSchema("ad-hoc", new DynamicColumnKey("record")), list));
-                }
-                else {
-                    rows = rowParser.valueToRows(registrar, value);
-                }
-
                 return rows;
             }
         }
@@ -117,14 +117,25 @@ class RowTextFileContentsIterator extends RowFileContentsIterator
         }
     }
 
-    /**
-     * @return true if we can read the file line by line, false otherwise
-     */
-    private boolean readByLine()
+    private Rows readLine() throws IOException
     {
-        final String[] tokenizedPathname = StringUtils.split(pathname, ".");
-        final String suffix = tokenizedPathname[tokenizedPathname.length - 1];
+        Rows rows = new Rows();
+        final String value = reader.readLine();
 
-        return !suffix.equals("smile") && !suffix.equals("thrift");
+        if (value == null) {
+            close();
+            return rows;
+        }
+
+        if (rawContents) {
+            final List<String> list = new ArrayList<String>();
+            list.add(value);
+            rows.add(RowFactory.getRow(new RowSchema("ad-hoc", new DynamicColumnKey("record")), list));
+        }
+        else {
+            rows = rowParser.valueToRows(registrar, value);
+        }
+
+        return rows;
     }
 }

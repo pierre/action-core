@@ -24,7 +24,6 @@ import com.ning.metrics.action.schema.Registrar;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import java.io.InputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -88,29 +87,5 @@ public class RowParser implements Serializable
             }
         }
         throw new RowAccessException(String.format("unknown class type: %s", line.getClass().getName()));
-    }
-
-    /**
-     * Given a stream (e.g. raw Smile or Thrift), deserialize it into a list of rows
-     *
-     * @param registrar Registrar, to match with schema
-     * @param pathname  full filename, useful to infer the serialization format
-     * @param in        stream to deserialize
-     * @return list of Row
-     * @throws RowAccessException if we don't know how to deserialize the line
-     */
-    public Rows streamToRows(final Registrar registrar, final String pathname, final InputStream in) throws RowAccessException
-    {
-        final String[] tokenizedPathname = StringUtils.split(pathname, ".");
-        final String suffix = tokenizedPathname[tokenizedPathname.length - 1];
-
-        if (suffix.equals("smile")) {
-            return serializations.get("com.ning.metrics.action.hdfs.data.parser.SmileRowSerializer").toRows(registrar, in);
-        }
-        else if (suffix.equals("thrift")) {
-            return serializations.get("com.ning.metrics.action.hdfs.data.parser.ThriftRowSerializer").toRows(registrar, in);
-        }
-
-        throw new RowAccessException(String.format("unknown file type: %s", suffix));
     }
 }

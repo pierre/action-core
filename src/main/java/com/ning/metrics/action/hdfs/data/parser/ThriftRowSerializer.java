@@ -46,18 +46,23 @@ public class ThriftRowSerializer implements RowSerializer
 
         final Rows rows = new Rows();
         while (deserializer.hasNextEvent()) {
-            final ThriftEnvelopeEvent event;
-            try {
-                event = deserializer.getNextEvent();
-            }
-            catch (IOException e) {
-                throw new RowAccessException(e);
-            }
-
-            final ThriftEnvelope envelope = (ThriftEnvelope) event.getData();
-            rows.addAll(envelopeRowSerializer.toRows(r, envelope));
+            eventToRow(r, deserializer, rows);
         }
 
         return rows;
+    }
+
+    public void eventToRow(Registrar r, ThriftEnvelopeEventDeserializer deserializer, Rows rows)
+    {
+        final ThriftEnvelopeEvent event;
+        try {
+            event = deserializer.getNextEvent();
+        }
+        catch (IOException e) {
+            throw new RowAccessException(e);
+        }
+
+        final ThriftEnvelope envelope = (ThriftEnvelope) event.getData();
+        rows.addAll(envelopeRowSerializer.toRows(r, envelope));
     }
 }

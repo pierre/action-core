@@ -60,43 +60,48 @@ public class SmileRowSerializer implements RowSerializer
 
         final Rows rows = new Rows();
         while (deserializer.hasNextEvent()) {
-            final SmileEnvelopeEvent event;
-            try {
-                event = deserializer.getNextEvent();
-            }
-            catch (IOException e) {
-                throw new RowAccessException(e);
-            }
-            final JsonNode node = (JsonNode) event.getData();
-
-            final Map<Short, GoodwillSchemaField> schema = r.getSchema(event.getName());
-            final List<ColumnKey> columnKeyList = new ArrayList<ColumnKey>(node.size());
-            final List<JsonNodeComparable> data = new ArrayList<JsonNodeComparable>(node.size());
-
-            // Without Goodwill integration, simply pass the raw json
-            if (schema == null) {
-                final Iterator<String> nodeFieldNames = node.getFieldNames();
-                while (nodeFieldNames.hasNext()) {
-                    columnKeyList.add(new DynamicColumnKey(nodeFieldNames.next()));
-                }
-
-                final Iterator<JsonNode> nodeElements = node.getElements();
-                while (nodeElements.hasNext()) {
-                    data.add(new JsonNodeComparable(nodeElements.next()));
-                }
-            }
-            else {
-                // With Goodwill, select only the fields present in the Goodwill schema, and preserve ordering
-                for (final GoodwillSchemaField schemaField : schema.values()) {
-                    final String schemaFieldName = schemaField.getName();
-                    columnKeyList.add(new DynamicColumnKey(schemaFieldName));
-                    data.add(new JsonNodeComparable(node.get(schemaFieldName)));
-                }
-            }
-
-            rows.add(RowFactory.getRow(new RowSchema(event.getName(), columnKeyList), data));
+            eventToRow(r, deserializer, rows);
         }
 
         return rows;
+    }
+
+    public static void eventToRow(Registrar r, SmileEnvelopeEventDeserializer deserializer, Rows rows)
+    {
+        final SmileEnvelopeEvent event;
+        try {
+            event = deserializer.getNextEvent();
+        }
+        catch (IOException e) {
+            throw new RowAccessException(e);
+        }
+        final JsonNode node = (JsonNode) event.getData();
+
+        final Map<Short, GoodwillSchemaField> schema = r.getSchema(event.getName());
+        final List<ColumnKey> columnKeyList = new ArrayList<ColumnKey>(node.size());
+        final List<JsonNodeComparable> data = new ArrayList<JsonNodeComparable>(node.size());
+
+        // Without Goodwill integration, simply pass the raw json
+        if (schema == null) {
+            final Iterator<String> nodeFieldNames = node.getFieldNames();
+            while (nodeFieldNames.hasNext()) {
+                columnKeyList.add(new DynamicColumnKey(nodeFieldNames.next()));
+            }
+
+            final Iterator<JsonNode> nodeElements = node.getElements();
+            while (nodeElements.hasNext()) {
+                data.add(new JsonNodeComparable(nodeElements.next()));
+            }
+        }
+        else {
+            // With Goodwill, select only the fields present in the Goodwill schema, and preserve ordering
+            for (final GoodwillSchemaField schemaField : schema.values()) {
+                final String schemaFieldName = schemaField.getName();
+                columnKeyList.add(new DynamicColumnKey(schemaFieldName));
+                data.add(new JsonNodeComparable(node.get(schemaFieldName)));
+            }
+        }
+
+        rows.add(RowFactory.getRow(new RowSchema(event.getName(), columnKeyList), data));
     }
 }
