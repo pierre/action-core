@@ -28,6 +28,11 @@ import org.apache.hadoop.io.SequenceFile;
 import java.io.IOException;
 import java.util.Iterator;
 
+/**
+ * Retrieve the content of a file as a list of Rows.
+ *
+ * @see Row
+ */
 @Singleton
 public class RowFileContentsIteratorFactory
 {

@@ -33,6 +33,7 @@ import java.util.List;
 
 /**
  * Container for list of {@link HdfsEntry}.
+ * In practice, this is a collection of files and directories.
  *
  * @see HdfsEntry
  */
