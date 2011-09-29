@@ -100,10 +100,10 @@ public class TestSmileRowSerializer
         final ImmutableMap<String, ValueNode> actual = firstRow.toMap();
         // Without the registrar, verify we output all fields, including the metadata ones (eventDate, eventGranularity)
         Assert.assertEquals(actual.keySet().size(), eventMap.keySet().size() + 2);
-        Assert.assertNotNull(actual.get("eventDate").getLongValue());
-        Assert.assertEquals(actual.get("eventGranularity").getTextValue(), "HOURLY");
-        Assert.assertEquals(actual.get("field1").getTextValue(), eventMap.get("field1"));
-        Assert.assertEquals(actual.get("field2").getTextValue(), eventMap.get("field2"));
+        Assert.assertNotNull(actual.get("eventDate"));
+        Assert.assertEquals(actual.get("eventGranularity"), "HOURLY");
+        Assert.assertEquals(actual.get("field1"), eventMap.get("field1"));
+        Assert.assertEquals(actual.get("field2"), eventMap.get("field2"));
     }
 
     @Test(groups = "fast")
@@ -120,9 +120,9 @@ public class TestSmileRowSerializer
         final ImmutableMap<String, ValueNode> actual = firstRow.toMap();
         // With the registrar, only the fields in the schema are outputted
         Assert.assertEquals(actual.keySet().size(), eventMap.keySet().size() + 1);
-        Assert.assertNotNull(actual.get("eventDate").getLongValue());
-        Assert.assertEquals(actual.get("field1").getTextValue(), eventMap.get("field1"));
-        Assert.assertEquals(actual.get("field2").getTextValue(), eventMap.get("field2"));
+        Assert.assertNotNull(actual.get("eventDate"));
+        Assert.assertEquals(actual.get("field1"), eventMap.get("field1"));
+        Assert.assertEquals(actual.get("field2"), eventMap.get("field2"));
     }
 
     private ByteArrayOutputStream createSmileEnvelopePayload(final Map<String, Object> map) throws IOException
