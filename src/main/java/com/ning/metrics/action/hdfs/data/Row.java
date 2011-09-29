@@ -23,6 +23,7 @@ import com.ning.metrics.action.hdfs.data.transformer.ColumnKeyTransformer;
 import org.apache.hadoop.io.WritableComparable;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.annotate.JsonValue;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.util.DefaultPrettyPrinter;
@@ -41,9 +42,6 @@ import java.util.List;
  */
 public abstract class Row<T extends Comparable, Serializable> implements WritableComparable
 {
-    protected static final JsonFactory jsonFactory = new JsonFactory();
-    private static final ObjectMapper jsonObjectMapper = new ObjectMapper(jsonFactory);
-
     public static final String JSON_ROW_ENTRIES = "entries";
 
     private static final String DELIM = ",";
@@ -214,7 +212,7 @@ public abstract class Row<T extends Comparable, Serializable> implements Writabl
         generator.writeStartObject();
         for (T item : data) {
             generator.writeFieldName(schema.getFieldNameByPosition(i));
-            jsonObjectMapper.writeValue(generator, getJsonValue(item));
+            generator.writeObject(getJsonValue(item));
             i++;
         }
         generator.writeEndObject();
