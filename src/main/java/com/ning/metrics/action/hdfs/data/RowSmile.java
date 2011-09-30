@@ -110,7 +110,7 @@ public class RowSmile extends Row<JsonNodeComparable, Serializable>
         if (item.getDelegate().isNumber()) {
             return item.getDelegate().getNumberValue();
         }
-        else if (item.getDelegate().isBinary()) {
+        else if (item.getDelegate().isBoolean()) {
             return item.getDelegate().getBooleanValue();
         }
         else if (item.getDelegate().isTextual()) {
