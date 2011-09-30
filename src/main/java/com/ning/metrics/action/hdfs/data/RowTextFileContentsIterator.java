@@ -16,6 +16,7 @@
 
 package com.ning.metrics.action.hdfs.data;
 
+import com.ning.metrics.action.hdfs.data.codec.DecompressedStreamFactory;
 import com.ning.metrics.action.hdfs.data.parser.BufferedRowsReader;
 import com.ning.metrics.action.hdfs.data.parser.BufferedSmileReader;
 import com.ning.metrics.action.hdfs.data.parser.BufferedThriftReader;
@@ -42,13 +43,24 @@ class RowTextFileContentsIterator extends RowFileContentsIterator
     private final BufferedReader reader;
     private final BufferedRowsReader streamReader;
 
-    public RowTextFileContentsIterator(final String pathname, final RowParser rowParser, final Registrar registrar, final InputStream in, final boolean rawContents) throws IOException
+    public RowTextFileContentsIterator(final String pathname, final RowParser rowParser, final Registrar registrar, final InputStream origStream, final boolean rawContents) throws IOException
     {
         super(pathname, rowParser, registrar, rawContents);
-        this.in = in;
         final String[] tokenizedPathname = StringUtils.split(pathname, ".");
-        final String suffix = tokenizedPathname[tokenizedPathname.length - 1];
+        String suffix = tokenizedPathname[tokenizedPathname.length - 1];
 
+        // First check if the file has been compressed
+        final InputStream stream = DecompressedStreamFactory.wrapStream(suffix, origStream);
+        if (stream != null) {
+            in = stream;
+            suffix = tokenizedPathname[tokenizedPathname.length - 2];
+        }
+        else {
+            // Nope
+            in = origStream;
+        }
+
+        // Then handling serialization format
         binary = suffix.equals("smile") || suffix.equals("thrift");
         if (suffix.equals("smile")) {
             reader = null;
