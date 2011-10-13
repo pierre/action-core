@@ -107,7 +107,10 @@ public class RowSmile extends Row<JsonNodeComparable, Serializable>
     @Override
     protected Object getJsonValue(JsonNodeComparable item)
     {
-        if (item.getDelegate().isNumber()) {
+        if (item == null || item.getDelegate() == null) {
+            return "";
+        }
+        else if (item.getDelegate().isNumber()) {
             return item.getDelegate().getNumberValue();
         }
         else if (item.getDelegate().isBoolean()) {
@@ -117,7 +120,7 @@ public class RowSmile extends Row<JsonNodeComparable, Serializable>
             return item.getDelegate().getTextValue();
         }
         else if (item.getDelegate().isNull()) {
-            return null;
+            return "";
         }
         else {
             return item.getDelegate();

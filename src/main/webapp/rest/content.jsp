@@ -81,13 +81,20 @@
             %>
             <tr>
                 <td>
-                    <% Row currentContent = content.next(); %>
-                    <a id="row_<%= currentLine %>" href="/rest/1.0/viewer?object=<%= URLEncoder.encode(new String(Base64.encodeBase64(currentContent.toJSON().getBytes())), "UTF-8") %>" target="_blank">
+                    <% Row currentContent = content.next();
+                        if (currentContent != null) {
+                            final String contentString = currentContent.toJSON();
+                            if (contentString != null) {%>
+                    <a id="row_<%= currentLine %>"
+                       href="/rest/1.0/viewer?object=<%= URLEncoder.encode(new String(Base64.encodeBase64(contentString.getBytes())), "UTF-8") %>"
+                       target="_blank">
                         <%= currentContent.toString() %>
                     </a>
                 </td>
             </tr>
             <%
+                                }
+                            }
                         }
                         else {
                             content.next();

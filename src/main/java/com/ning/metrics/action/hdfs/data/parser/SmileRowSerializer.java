@@ -28,6 +28,7 @@ import com.ning.metrics.goodwill.access.GoodwillSchemaField;
 import com.ning.metrics.serialization.event.SmileEnvelopeEvent;
 import com.ning.metrics.serialization.smile.SmileEnvelopeEventDeserializer;
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.node.NullNode;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -90,7 +91,11 @@ public class SmileRowSerializer implements RowSerializer
 
             final Iterator<JsonNode> nodeElements = node.getElements();
             while (nodeElements.hasNext()) {
-                data.add(new JsonNodeComparable(nodeElements.next()));
+                JsonNode next = nodeElements.next();
+                if (next == null) {
+                    next = NullNode.getInstance();
+                }
+                data.add(new JsonNodeComparable(next));
             }
         }
         else {
@@ -98,7 +103,11 @@ public class SmileRowSerializer implements RowSerializer
             for (final GoodwillSchemaField schemaField : schema.values()) {
                 final String schemaFieldName = schemaField.getName();
                 columnKeyList.add(new DynamicColumnKey(schemaFieldName));
-                data.add(new JsonNodeComparable(node.get(schemaFieldName)));
+                JsonNode delegate = node.get(schemaFieldName);
+                if (delegate == null) {
+                    delegate = NullNode.getInstance();
+                }
+                data.add(new JsonNodeComparable(delegate));
             }
         }
 

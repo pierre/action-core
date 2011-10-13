@@ -23,9 +23,7 @@ import com.ning.metrics.action.hdfs.data.transformer.ColumnKeyTransformer;
 import org.apache.hadoop.io.WritableComparable;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.annotate.JsonValue;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.util.DefaultPrettyPrinter;
 
 import java.io.DataInput;
@@ -187,8 +185,9 @@ public abstract class Row<T extends Comparable, Serializable> implements Writabl
                 sb.append(delimiter);
             }
 
-            sb.append(item.toString());
-
+            if (item != null) {
+                sb.append(item.toString());
+            }
             first = false;
         }
 
