@@ -16,13 +16,10 @@
 
 package com.ning.metrics.action.hdfs.data;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonToken;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -108,6 +105,20 @@ public class JsonNodeComparable extends JsonNode implements Comparable
     public JsonParser.NumberType getNumberType()
     {
         return delegate.getNumberType();
+    }
+
+    /**
+     * Method that will return valid String representation of
+     * the container value, if the node is a value node
+     * (method {@link #isValueNode} returns true), otherwise
+     * empty String.
+     *
+     * @since 1.9 (replaces <code>getValueAsText</code>)
+     */
+    @Override
+    public String asText()
+    {
+        return delegate.asText();
     }
 
     /**
@@ -220,26 +231,9 @@ public class JsonNodeComparable extends JsonNode implements Comparable
     }
 
     /**
-     * Method that can be called to serialize this node and
-     * all of its descendants using specified JSON generator.
-     *
-     * @deprecated Use methods that are part of {@link org.codehaus.jackson.JsonGenerator}
-     *             or {@link org.codehaus.jackson.map.ObjectMapper}
-     *             instead.
-     */
-    @Override
-    public void writeTo(JsonGenerator jg) throws IOException, JsonGenerationException
-    {
-        delegate.writeTo(jg);
-    }
-
-    /**
      * Method for constructing a {@link org.codehaus.jackson.JsonParser} instance for
      * iterating over contents of the tree that this
      * node is root of.
-     * Functionally equivalent to first serializing tree
-     * using {@link #writeTo} and then re-parsing but much
-     * more efficient.
      */
     @Override
     public JsonParser traverse()

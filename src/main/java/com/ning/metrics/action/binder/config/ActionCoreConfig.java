@@ -46,6 +46,10 @@ public interface ActionCoreConfig
     @Default("org.apache.hadoop.io.serializer.WritableSerialization")
     String getSerializations();
 
+    @Config("action.registrar.enabled")
+    @Default("false")
+    boolean isRegistrarEnabled();
+
     @Config("action.registrar.host")
     @Default("127.0.0.1")
     String getRegistrarHost();
@@ -53,8 +57,4 @@ public interface ActionCoreConfig
     @Config("action.registrar.port")
     @Default("8081")
     int getRegistrarPort();
-
-    @Config("action.registrar.file")
-    @Default(".registrar.cache")
-    String getRegistrarStateFile();
 }

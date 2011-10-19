@@ -14,33 +14,30 @@
  * under the License.
  */
 
-package com.ning.metrics.action.binder;
+package com.ning.metrics.action.schema;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Singleton;
-import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
+import com.ning.metrics.goodwill.access.GoodwillSchemaField;
 
-import javax.servlet.ServletException;
+import java.util.Collection;
+import java.util.Map;
 
-@Singleton
-public class ActionCoreContainer extends GuiceContainer
+public class NoOpRegistrar implements Registrar
 {
-    @Inject
-    public ActionCoreContainer(final Injector injector)
+    @Override
+    public String getCanonicalName(String type)
     {
-        super(injector);
+        return null;
     }
 
     @Override
-    public void init() throws ServletException
+    public Collection<String> getAllTypes()
     {
-        super.init();
+        return null;
     }
 
     @Override
-    public void destroy()
+    public Map<Short, GoodwillSchemaField> getSchema(String type)
     {
-        super.destroy();
+        return null;
     }
 }

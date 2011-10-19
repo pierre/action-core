@@ -23,10 +23,6 @@
         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
         version="2.5">
     <display-name>action-core</display-name>
-    <context-param>
-        <param-name>guiceModuleClassName</param-name>
-        <param-value>com.ning.metrics.action.binder.modules.ActionCoreServerModule</param-value>
-    </context-param>
     <filter>
         <!-- Guice emulates Servlet API with DI -->
         <filter-name>guiceFilter</filter-name>
@@ -34,14 +30,23 @@
     </filter>
     <filter-mapping>
         <filter-name>guiceFilter</filter-name>
-        <url-pattern>/rest/*</url-pattern>
+        <url-pattern>/*</url-pattern>
     </filter-mapping>
     <listener>
         <!-- Jersey insists on using java.util.logging (JUL) -->
-        <listener-class>com.ning.metrics.action.binder.filters.SetupJULBridge</listener-class>
+        <listener-class>com.ning.jetty.core.listeners.SetupJULBridge</listener-class>
     </listener>
     <listener>
         <!-- Context listener: called at startup time and creates the injector -->
-        <listener-class>com.ning.metrics.action.binder.modules.SetupServer</listener-class>
+        <listener-class>com.ning.metrics.action.binder.listeners.ActionCoreGuiceListener</listener-class>
     </listener>
+    <!-- ServletHandler#handle requires a backend servlet, it won't be used though (handled by Guice) -->
+    <servlet>
+        <servlet-name>log-invalid-resources</servlet-name>
+        <servlet-class>com.ning.jetty.core.servlets.LogInvalidResourcesServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>log-invalid-resources</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>
 </web-app>

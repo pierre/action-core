@@ -14,7 +14,8 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.sonatype.oss</groupId>
         <artifactId>oss-parent</artifactId>
@@ -67,21 +68,20 @@
             <artifactId>guice</artifactId>
             <version>3.0</version>
         </dependency>
-        <!-- jersey-guice depends on 2.0 version - which one to use? -->
-        <!--<dependency>
-            <groupId>com.google.code.guice</groupId>
-            <artifactId>guice-servlet</artifactId>
-            <version>2.0-ISSUE418</version>
-        </dependency>-->
+        <dependency>
+            <groupId>com.google.inject.extensions</groupId>
+            <artifactId>guice-multibindings</artifactId>
+            <version>3.0</version>
+        </dependency>
         <dependency>
             <groupId>com.google.inject.extensions</groupId>
             <artifactId>guice-servlet</artifactId>
             <version>3.0</version>
         </dependency>
         <dependency>
-            <groupId>com.google.collections</groupId>
-            <artifactId>google-collections</artifactId>
-            <version>1.0</version>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>10.0.1</version>
         </dependency>
         <dependency>
             <groupId>com.ning</groupId>
@@ -91,43 +91,53 @@
         <dependency>
             <groupId>com.ning</groupId>
             <artifactId>metrics.goodwill-access</artifactId>
-            <version>0.1.1</version>
+            <version>0.1.5</version>
         </dependency>
         <dependency>
             <groupId>com.ning</groupId>
             <artifactId>metrics.serialization-common</artifactId>
-            <version>2.0.1</version>
+            <version>2.0.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.ning</groupId>
             <artifactId>metrics.serialization-hadoop</artifactId>
-            <version>2.0.1</version>
+            <version>2.0.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.ning</groupId>
             <artifactId>metrics.serialization-smile</artifactId>
-            <version>2.0.1</version>
+            <version>2.0.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.ning</groupId>
             <artifactId>metrics.serialization-thrift</artifactId>
-            <version>2.0.1</version>
+            <version>2.0.3-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ning.arecibo</groupId>
+            <artifactId>arecibo-jmx</artifactId>
+            <version>1.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ning.arecibo</groupId>
+            <artifactId>arecibo-metrics</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ning.jetty</groupId>
+            <artifactId>ning-service-skeleton-base</artifactId>
+            <version>0.0.6-SNAPSHOT</version>
         </dependency>
         <dependency>
             <!-- Viewable body writer -->
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-server</artifactId>
-            <version>1.1.5</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.jersey.contribs</groupId>
-            <artifactId>jersey-guice</artifactId>
-            <version>1.3</version>
+            <version>1.9.1</version>
         </dependency>
         <dependency>
             <groupId>com.yammer.metrics</groupId>
             <artifactId>metrics-guice</artifactId>
-            <version>2.0.0-BETA14</version>
+            <version>2.0.0-BETA16</version>
         </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>
@@ -137,7 +147,7 @@
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-            <version>1.6.2</version>
+            <version>2.0</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
@@ -198,44 +208,39 @@
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-core-asl</artifactId>
-            <version>1.8.1</version>
+            <version>1.9.0</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-jaxrs</artifactId>
-            <version>1.8.1</version>
+            <version>1.9.0</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-mapper-asl</artifactId>
-            <version>1.8.1</version>
+            <version>1.9.0</version>
         </dependency>
         <dependency>
-            <groupId>org.mortbay.jetty</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5-20081211</version>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.0.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.skife.config</groupId>
             <artifactId>config-magic</artifactId>
-            <version>0.8</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jul-to-slf4j</artifactId>
-            <version>1.5.11</version>
+            <version>0.9</version>
         </dependency>
         <dependency><!-- Needed for generated Scribe and Thrift classes -->
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.5.11</version>
+            <version>1.6.3</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>1.5.11</version>
+            <version>1.6.3</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -384,22 +389,20 @@
                     <attachClasses>true</attachClasses>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.mortbay.jetty</groupId>
-                <artifactId>maven-jetty-plugin</artifactId>
-                <version>6.1.22</version>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>7.5.3.v20111011</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.slf4j</groupId>
                         <artifactId>slf4j-log4j12</artifactId>
-                        <!-- Has to match jetty's version, see http://www.slf4j.org/faq.html#IllegalAccessError -->
-                        <version>1.5.11</version>
+                        <version>1.6.3</version>
                     </dependency>
                     <dependency>
                         <groupId>log4j</groupId>
                         <artifactId>log4j</artifactId>
-                        <version>1.2.13</version>
+                        <version>1.2.16</version>
                     </dependency>
                 </dependencies>
                 <configuration>
@@ -538,6 +541,6 @@
     </mailingLists>
     <issueManagement>
         <system>Github</system>
-        <url>http://github.com/pierre/goodwill-access/issues</url>
+        <url>http://github.com/pierre/action-access/issues</url>
     </issueManagement>
 </project>
