@@ -186,6 +186,7 @@
                 <configuration>
                     <webAppConfig>
                         <contextPath>/</contextPath>
+                        <defaultsDescriptor>${basedir}/src/main/jetty-config/etc/webdefault.xml</defaultsDescriptor>
                     </webAppConfig>
                     <systemProperties>
                         <systemProperty>
