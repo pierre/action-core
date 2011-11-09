@@ -90,7 +90,7 @@ class RowTextFileContentsIterator extends RowFileContentsIterator
                 readerClosed = true;
             }
             catch (IOException e) {
-                log.warn(String.format("Unable to close reader: %s", e));
+                log.warn("Unable to close reader", e);
             }
         }
     }
@@ -121,7 +121,7 @@ class RowTextFileContentsIterator extends RowFileContentsIterator
             }
         }
         catch (IOException e) {
-            log.info(String.format("IOException reading file %s, skipping", pathname));
+            log.info("IOException reading file {}, skipping", pathname);
 
             close();
 

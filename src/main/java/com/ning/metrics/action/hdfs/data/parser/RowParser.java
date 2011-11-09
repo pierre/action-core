@@ -22,7 +22,8 @@ import com.ning.metrics.action.hdfs.data.RowAccessException;
 import com.ning.metrics.action.hdfs.data.Rows;
 import com.ning.metrics.action.schema.Registrar;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -30,7 +31,7 @@ import java.util.Map;
 
 public class RowParser implements Serializable
 {
-    private static final Logger log = Logger.getLogger(RowParser.class);
+    private static final Logger log = LoggerFactory.getLogger(RowParser.class);
 
     private final Map<String, RowSerializer> serializations = new HashMap<String, RowSerializer>();
     private final ClassLoader classLoader;
@@ -53,13 +54,13 @@ public class RowParser implements Serializable
                 add(serializerName);
             }
             catch (ClassNotFoundException e) {
-                log.warn(String.format("Ignoring specified RowSerializer [%s], as it is not in classpath", serializerName));
+                log.warn("Ignoring specified RowSerializer [{}], as it is not in classpath", serializerName);
             }
             catch (InstantiationException e) {
-                log.warn(String.format("Ignoring specified RowSerializer [%s]", serializerName), e);
+                log.warn("Ignoring specified RowSerializer [{}]: {}", serializerName, e);
             }
             catch (IllegalAccessException e) {
-                log.warn(String.format("Ignoring specified RowSerializer [%s]", serializerName), e);
+                log.warn("Ignoring specified RowSerializer [{}]: {}", serializerName, e);
             }
         }
     }

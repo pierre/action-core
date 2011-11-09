@@ -25,9 +25,10 @@ import com.sun.jersey.api.view.Viewable;
 import com.yammer.metrics.guice.Timed;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -52,7 +53,7 @@ import java.util.LinkedHashMap;
 @Path("/rest/1.0")
 public class HdfsBrowser
 {
-    private final Logger log = Logger.getLogger(HdfsBrowser.class);
+    private final Logger log = LoggerFactory.getLogger(HdfsBrowser.class);
 
     private final ActionCoreConfig config;
     private final HdfsReaderEndPoint hdfsReader;
@@ -201,7 +202,7 @@ public class HdfsBrowser
                 message = e.toString();
             }
 
-            log.warn(String.format("Unable to create [%s]: %s", outputPath, message));
+            log.warn("Unable to create [{}]: {}", outputPath, message);
             return Response.serverError().header("Warning", "199 " + message).cacheControl(cacheControl).build();
         }
     }
@@ -209,7 +210,10 @@ public class HdfsBrowser
     @DELETE
     @Produces(MediaType.TEXT_PLAIN)
     @Timed
-    public Response delete(@QueryParam("path") final String outputPath, @QueryParam("recursive") @DefaultValue("false") final boolean recursive) throws IOException
+    public Response delete(
+        @QueryParam("path") final String outputPath,
+        @QueryParam("recursive") @DefaultValue("false") final boolean recursive
+    ) throws IOException
     {
         try {
             hdfsWriter.delete(outputPath, recursive);
@@ -217,7 +221,7 @@ public class HdfsBrowser
         }
         catch (IOException e) {
             final String message = StringUtils.split(e.getMessage(), '\n')[0];
-            log.warn(String.format("Unable to delete [%s]: %s", outputPath, message));
+            log.warn("Unable to delete [{}]: {}", outputPath, message);
             return Response.serverError().header("Warning", "199 " + message).cacheControl(cacheControl).build();
         }
     }

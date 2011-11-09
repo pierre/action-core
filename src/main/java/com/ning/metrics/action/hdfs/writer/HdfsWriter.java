@@ -21,7 +21,8 @@ import com.ning.metrics.serialization.hadoop.FileSystemAccess;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.permission.FsPermission;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +30,7 @@ import java.net.URI;
 
 public class HdfsWriter
 {
-    private static final Logger log = Logger.getLogger(HdfsWriter.class);
+    private static final Logger log = LoggerFactory.getLogger(HdfsWriter.class);
     // Make sure to bump your young generation
     private static final int ONE_MEG = 1024;
 
@@ -51,7 +52,7 @@ public class HdfsWriter
     ) throws IOException
     {
         final long start = System.nanoTime();
-        log.info(String.format("Writing to HDFS: %s", outputPath));
+        log.info("Writing to HDFS: {}", outputPath);
 
         final Path hdfsPath = new Path(outputPath);
         FSDataOutputStream outputStream = null;
@@ -86,7 +87,7 @@ public class HdfsWriter
 
     public void delete(final String outputPath, final boolean recursive) throws IOException
     {
-        log.info(String.format("Deleting: %s (%srecursive)", outputPath, recursive ? "" : "non "));
+        log.info("Deleting: {} ({}recursive)", outputPath, recursive ? "" : "non ");
         fileSystemAccess.get().delete(new Path(outputPath), recursive);
     }
 }

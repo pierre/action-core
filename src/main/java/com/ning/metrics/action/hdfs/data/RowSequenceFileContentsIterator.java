@@ -45,7 +45,7 @@ class RowSequenceFileContentsIterator extends RowFileContentsIterator
                 readerClosed = true;
             }
             catch (IOException e) {
-                log.warn(String.format("Unable to close reader: %s", e));
+                log.warn("Unable to close reader", e);
             }
         }
     }
@@ -67,7 +67,7 @@ class RowSequenceFileContentsIterator extends RowFileContentsIterator
                 Rows rows = new Rows();
 
                 if (key != null) {
-                    log.debug(String.format("Read object [%s]", key));
+                    log.debug("Read object [{}]", key);
 
                     final Object value = reader.getCurrentValue((Object) null);
 
@@ -93,7 +93,7 @@ class RowSequenceFileContentsIterator extends RowFileContentsIterator
             }
         }
         catch (IOException e) {
-            log.info(String.format("IOException reading file %s, skipping", pathname));
+            log.info("IOException reading file {}, skipping", pathname);
 
             close();
 

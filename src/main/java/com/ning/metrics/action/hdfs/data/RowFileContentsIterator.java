@@ -18,9 +18,10 @@ package com.ning.metrics.action.hdfs.data;
 
 import com.ning.metrics.action.hdfs.data.parser.RowParser;
 import com.ning.metrics.action.schema.Registrar;
-import org.apache.log4j.Logger;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.util.Iterator;
@@ -32,7 +33,7 @@ import java.util.NoSuchElementException;
  */
 abstract class RowFileContentsIterator implements Iterator<Row>, Closeable
 {
-    static final Logger log = Logger.getLogger(RowFileContentsIterator.class);
+    static final Logger log = LoggerFactory.getLogger(RowFileContentsIterator.class);
 
     final boolean rawContents;
     final String pathname;
