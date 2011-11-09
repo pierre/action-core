@@ -20,6 +20,7 @@ import com.ning.metrics.action.hdfs.data.Rows;
 import com.ning.metrics.action.schema.Registrar;
 import com.ning.metrics.serialization.thrift.ThriftEnvelopeEventDeserializer;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 public class BufferedThriftReader implements BufferedRowsReader
@@ -30,7 +31,7 @@ public class BufferedThriftReader implements BufferedRowsReader
     private final ThriftEnvelopeEventDeserializer deserializer;
     private final ThriftRowSerializer serializer;
 
-    public BufferedThriftReader(Registrar registrar, InputStream stream)
+    public BufferedThriftReader(Registrar registrar, InputStream stream) throws IOException
     {
         this.registrar = registrar;
         deserializer = new ThriftEnvelopeEventDeserializer(stream);
