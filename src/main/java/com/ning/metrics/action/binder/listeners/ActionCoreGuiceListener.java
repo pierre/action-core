@@ -37,6 +37,8 @@ public class ActionCoreGuiceListener extends SetupServer
             .setAreciboProfile(System.getProperty("action.arecibo.profile", "ning.jmx:name=MonitoringProfile"))
             .addModule(new HdfsModule())
             .addModule(new ActionCoreServicesModule())
+            .enableLog4J()
+            .trackRequests()
             .addResource("com.ning.metrics.action.endpoint");
 
         guiceModule = builder.build();

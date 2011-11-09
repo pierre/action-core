@@ -20,9 +20,25 @@
                      xmlns:log4j='http://jakarta.apache.org/log4j/'>
     <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
         <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%p        %X{trace}   %d{ISO8601} %t      %c      %m%n"/>
+            <param name="ConversionPattern" value="%p	%d{ISO8601}	%X{trace}	%t	%c	%m%n"/>
         </layout>
     </appender>
+
+    <appender name="requests" class="org.apache.log4j.RollingFileAppender">
+        <param name="File" value="logs/http.log"/>
+        <param name="MaxFileSize" value="100MB"/>
+        <param name="MaxBackupIndex" value="1"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%p	%d{ISO8601}	%X{trace}	%t	%c	%m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="LOG_LEVEL_COUNTER" class="com.ning.jetty.log4j.LogLevelCounterAppender"/>
+
+    <logger name="com.sun.jersey.api.container.filter" additivity="false">
+        <level value="info"/>
+        <appender-ref ref="requests"/>
+    </logger>
 
     <logger name="com.ning.metrics">
         <level value="info"/>
@@ -31,6 +47,7 @@
     <logger name="org.apache.jasper">
         <level value="info"/>
     </logger>
+
     <logger name="org.mortbay.log">
         <level value="info"/>
     </logger>
@@ -38,5 +55,6 @@
     <root>
         <level value="info"/>
         <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="LOG_LEVEL_COUNTER"/>
     </root>
 </log4j:configuration>

@@ -8,3 +8,5 @@ overlays
 examples
 pom.xml.releaseBackup
 release.properties
+.diskspool
+logs
