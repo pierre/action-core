@@ -42,9 +42,7 @@ public class RowThrift extends Row<DataItem, Serializable>
 {
     @JsonCreator
     @SuppressWarnings("unused")
-    public RowThrift(
-        @JsonProperty(JSON_ROW_ENTRIES) List<String> entries
-    )
+    public RowThrift(@JsonProperty(JSON_ROW_ENTRIES) List<String> entries)
     {
         this.schema = null;
 

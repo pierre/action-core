@@ -85,6 +85,7 @@
                     </a>
                     <% if (!e.isDirectory()) { %>
                     <a href="?path=<%= e.getPath() %>&amp;raw=true">(raw)</a>
+                    <a href="/rest/1.0/binary?path=<%= e.getPath() %>">(binary)</a>
                     <% } %>
                 </td>
                 <td><%= e.getModificationDate() %>

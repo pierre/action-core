@@ -16,12 +16,17 @@
 
 package com.ning.metrics.action.hdfs.reader;
 
+import com.google.common.io.ByteStreams;
 import com.google.inject.Inject;
 import com.ning.metrics.action.hdfs.data.RowFileContentsIteratorFactory;
 import com.ning.metrics.serialization.hadoop.FileSystemAccess;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.Path;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
+import java.io.OutputStream;
 
 public class HdfsReaderEndPoint
 {
@@ -55,14 +60,40 @@ public class HdfsReaderEndPoint
     /**
      * Return content in a directory/file, possibly recursively.
      *
-     * @param path
-     * @param raw
-     * @param recursive
+     * @param path      path to either a file or directory
+     * @param raw       whether to lookup in Goodwill the schema
+     * @param recursive for directories, whether to download recursively the data
      * @return HdfsListing containing entries in the directory
-     * @throws java.io.IOException
+     * @throws java.io.IOException generic I/O Exception
      */
     public HdfsListing getListing(final String path, final boolean raw, final boolean recursive) throws IOException
     {
         return new HdfsListing(fileSystemAccess.get(), new Path(path), raw, rowFileContentsIteratorFactory, recursive);
+    }
+
+    /**
+     * Stream a file from HDFS without doing any deserialization.
+     *
+     * @param path path to a file
+     * @return stream of data
+     * @throws IOException generic I/O Exception
+     */
+    public StreamingOutput getFile(final String path) throws IOException
+    {
+        final FSDataInputStream inputStream = fileSystemAccess.get().open(new Path(path));
+
+        return new StreamingOutput()
+        {
+            @Override
+            public void write(OutputStream output) throws IOException, WebApplicationException
+            {
+                try {
+                    ByteStreams.copy(inputStream, output);
+                }
+                finally {
+                    inputStream.close();
+                }
+            }
+        };
     }
 }

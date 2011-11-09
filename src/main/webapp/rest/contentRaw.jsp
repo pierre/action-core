@@ -40,7 +40,6 @@ page contentType="text/plain"
                     startLine = 1;
                     endLine = -1;
 }
-int snippetLength = endLine - startLine + 1;
 
 int currentLine = 1;
 

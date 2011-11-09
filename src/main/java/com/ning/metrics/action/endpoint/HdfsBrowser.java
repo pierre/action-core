@@ -147,6 +147,19 @@ public class HdfsBrowser
     }
 
     @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("/binary")
+    @Timed
+    public StreamingOutput download(@QueryParam("path") final String path) throws IOException
+    {
+        if (hdfsReader.isDir(path)) {
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        }
+
+        return hdfsReader.getFile(path);
+    }
+
+    @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/viewer")
     @Timed
