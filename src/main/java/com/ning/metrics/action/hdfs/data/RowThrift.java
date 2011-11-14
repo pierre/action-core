@@ -103,6 +103,10 @@ public class RowThrift extends Row<DataItem, Serializable>
     @Override
     protected Object getJsonValue(DataItem dataItem)
     {
+        if (dataItem == null) {
+            return "";
+        }
+
         switch (dataItem.getThriftType()) {
             case TType.BOOL:
                 return dataItem.getBoolean();
