@@ -24,7 +24,7 @@
     <groupId>com.ning</groupId>
     <artifactId>metrics.action</artifactId>
     <packaging>war</packaging>
-    <version>0.2.10-SNAPSHOT</version>
+    <version>0.2.10</version>
     <name>action</name>
     <description>HDFS browser</description>
     <url>http://github.com/pierre/action-core</url>
