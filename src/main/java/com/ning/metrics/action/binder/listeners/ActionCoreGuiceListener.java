@@ -38,7 +38,6 @@ public class ActionCoreGuiceListener extends SetupServer
             .addModule(new HdfsModule())
             .addModule(new ActionCoreServicesModule())
             .enableLog4J()
-            .trackRequests()
             .addResource("com.ning.metrics.action.endpoint");
 
         guiceModule = builder.build();
