@@ -25,7 +25,7 @@ import com.ning.metrics.goodwill.access.GoodwillSchemaField;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -72,7 +72,8 @@ public class GoodwillRegistrar implements Registrar
     @Override
     public Map<Short, GoodwillSchemaField> getSchema(String type)
     {
-        Map<Short, GoodwillSchemaField> result = new HashMap<Short, GoodwillSchemaField>();
+        // Make sure to use a LinkedHashMap to preserve ordering
+        Map<Short, GoodwillSchemaField> result = new LinkedHashMap<Short, GoodwillSchemaField>();
 
         GoodwillSchema goodwillSchema = goodwillAccessor.getSchema(type);
         // Schema not found
