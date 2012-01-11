@@ -1,57 +1,69 @@
-= action-core
+= Action core
 
-The action-core is an HDFS endpoint. Unlike the browser shipped with the Hadoop namenode, it integrates a de-serialization
-mechanism to read files content.
+The Action core exposes HDFS over HTTP. It provides a REST interface as well as a browsing UI.
+Unlike the browser shipped with the Hadoop namenode, it integrates a de-serialization mechanism to read files content.
 
+More detailed documentation can be found {here}[http://pierre.github.com/action-core.html].
 
-= Usage
+== Download
 
-    mvn -Daction.hadoop.namenode.url=hdfs://namenode.mycompany.com:9000 jetty:run
+war artifacts can be found at {Maven Central}[http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.ning%22%20AND%20a%3A%22metrics.action%22].
+
+== Build
+
+    mvn install
+
+== Configuration options
+
+See {ActionCoreConfig.java}[https://github.com/pierre/action-core/blob/master/src/main/java/com/ning/metrics/action/binder/config/ActionCoreConfig.java] for configuration options.
+
+== Run
+
+    mvn -Daction.hadoop.namenode.url=hdfs://namenode.company.com:9000 jetty:run
 
 You can now browse HDFS:
 
-  http://127.0.0.1:8080/metrics.action/action
+    http://127.0.0.1:8080/rest/1.0/hdfs?path=/
 
-
-== Query parameters
+=== Query parameters
 
 * path: path to open in HDFS
 * range: when opening a file, bucket of lines to display (e.g. range=1-50 for the first 51 lines)
 * raw: whether to display the nice, HTML version (raw=true) or plain text (raw=false)
 * recursive: whether to craw a directory recursively. If you want to download all content under /user/pierre:
 
-    curl 'http://127.0.0.1:8080/metrics.action/action?path=/user/pierre&recursive=true&raw=true'
+    curl 'http://127.0.0.1:8080/rest/1.0/hdfs?path=/user/pierre&recursive=true&raw=true'
 
 
 == Notes on serialization
 
-You can specify your custom serialization classes (which implement org.apache.hadoop.io.serializer.Serialization<T>) on the command line
+You can specify your custom Hadoop serialization classes (which implement org.apache.hadoop.io.serializer.Serialization<T>) on the command line
 (make sure to escape the comma):
 
-    -Daction.hadoop.io.serializations=com.mycompany.FuuBarSerialization\,org.apache.hadoop.io.serializer.WritableSerialization
+    -Daction.hadoop.io.serializations=com.company.HadoopSecretSerialization\,org.apache.hadoop.io.serializer.WritableSerialization
 
 
-The action-core implements two different row renderers, one for ThriftEnvelope (see http://github.com/pierre/serialization) and one for
-org.apache.hadoop.io.Text. This means that if you use the collector (see http://github.com/pierre/collector) or plain text files, the
-action-core should work out of the box. Otherwise, you need to implement your renderer (see com.ning.metrics.action.hdfs.data.parser.RowSerializer)
-and specify it on the command line, e.g.:
-
-    -Daction.hadoop.io.row.serializations=com.mycompany.FuuBarRowSerializer\,com.ning.metrics.action.hdfs.data.parser.WritableRowSerializer
-
+You can also implement custom renderers, see the {documentation}[http://pierre.github.com/action-core.html#serialization] for more details.
 
 == Documenting schemas
 
 When clicking on a row, an exploded content of the row is show as JSON. By default, each column is labeled as "Field_...".
 This can be overridden by implementing the Registrar interface.
 
-action-core supports out of the box Goodwill (see http://github.com/pierre/goodwill) which is an HTTP based type registrar.
+The Action core supports out of the box Goodwill (see http://github.com/pierre/goodwill) which is an HTTP based type registrar.
 
-= Build
+== License (see COPYING file for full license)
 
-    mvn package
+Copyright 2010-2012 Ning
 
-will build a war.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-= License
+    http://www.apache.org/licenses/LICENSE-2.0
 
-See COPYING file.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
