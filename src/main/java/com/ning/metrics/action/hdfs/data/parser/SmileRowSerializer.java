@@ -27,8 +27,9 @@ import com.ning.metrics.action.schema.Registrar;
 import com.ning.metrics.goodwill.access.GoodwillSchemaField;
 import com.ning.metrics.serialization.event.SmileEnvelopeEvent;
 import com.ning.metrics.serialization.smile.SmileEnvelopeEventDeserializer;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.NullNode;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -84,12 +85,12 @@ public class SmileRowSerializer implements RowSerializer
 
         // Without Goodwill integration, simply pass the raw json
         if (schema == null) {
-            final Iterator<String> nodeFieldNames = node.getFieldNames();
+            final Iterator<String> nodeFieldNames = node.fieldNames();
             while (nodeFieldNames.hasNext()) {
                 columnKeyList.add(new DynamicColumnKey(nodeFieldNames.next()));
             }
 
-            final Iterator<JsonNode> nodeElements = node.getElements();
+            final Iterator<JsonNode> nodeElements = node.elements();
             while (nodeElements.hasNext()) {
                 JsonNode next = nodeElements.next();
                 if (next == null) {

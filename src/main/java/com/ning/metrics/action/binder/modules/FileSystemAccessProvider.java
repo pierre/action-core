@@ -16,8 +16,6 @@
 
 package com.ning.metrics.action.binder.modules;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.ning.metrics.action.binder.config.ActionCoreConfig;
 import com.ning.metrics.serialization.hadoop.FileSystemAccess;
 import com.ning.metrics.serialization.hadoop.HadoopSmileOutputStreamSerialization;
@@ -25,6 +23,8 @@ import com.ning.metrics.serialization.hadoop.HadoopThriftEnvelopeSerialization;
 import com.ning.metrics.serialization.hadoop.HadoopThriftWritableSerialization;
 import org.apache.hadoop.conf.Configuration;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
 import java.io.IOException;
 
 class FileSystemAccessProvider implements Provider<FileSystemAccess>

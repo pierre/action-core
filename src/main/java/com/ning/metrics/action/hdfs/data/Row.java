@@ -16,15 +16,17 @@
 
 package com.ning.metrics.action.hdfs.data;
 
-import com.google.common.collect.ImmutableMap;
 import com.ning.metrics.action.hdfs.data.schema.ColumnKey;
 import com.ning.metrics.action.hdfs.data.schema.RowSchema;
 import com.ning.metrics.action.hdfs.data.transformer.ColumnKeyTransformer;
+
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.google.common.collect.ImmutableMap;
+
 import org.apache.hadoop.io.WritableComparable;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.annotate.JsonValue;
-import org.codehaus.jackson.util.DefaultPrettyPrinter;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -63,8 +65,7 @@ public abstract class Row<T extends Comparable, Serializable> implements Writabl
         int pos = schema.getColNum(key);
 
         if (pos >= data.size()) {
-            throw new RowAccessException(
-                String.format("column key %s maps to position %d and max position in data is %d", key, pos, data.size() - 1));
+            throw new RowAccessException(String.format("column key %s maps to position %d and max position in data is %d", key, pos, data.size() - 1));
         }
 
         return data.get(schema.getColNum(key));

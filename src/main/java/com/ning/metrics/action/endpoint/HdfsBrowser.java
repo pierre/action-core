@@ -16,17 +16,19 @@
 
 package com.ning.metrics.action.endpoint;
 
-import com.google.inject.Inject;
 import com.ning.metrics.action.binder.config.ActionCoreConfig;
 import com.ning.metrics.action.hdfs.reader.HdfsListing;
 import com.ning.metrics.action.hdfs.reader.HdfsReaderEndPoint;
 import com.ning.metrics.action.hdfs.writer.HdfsWriter;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.inject.Inject;
 import com.sun.jersey.api.view.Viewable;
-import com.yammer.metrics.guice.Timed;
+import com.yammer.metrics.annotation.Timed;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,11 +88,9 @@ public class HdfsBrowser
     @Path("/hdfs")
     @Produces({"text/html", "text/plain"})
     @Timed
-    public Viewable getListing(
-        @QueryParam("path") String path,
-        @QueryParam("raw") final boolean raw,
-        @QueryParam("recursive") final boolean recursive
-    ) throws IOException
+    public Viewable getListing(@QueryParam("path") String path,
+                               @QueryParam("raw") final boolean raw,
+                               @QueryParam("recursive") final boolean recursive) throws IOException
     {
         log.debug(String.format("Got request for path=[%s], raw=[%s] and recursive=[%s]", path, raw, recursive));
 
@@ -115,12 +115,10 @@ public class HdfsBrowser
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/json")
     @Timed
-    public StreamingOutput listingToJson(
-        @QueryParam("path") final String path,
-        @QueryParam("recursive") final boolean recursive,
-        @QueryParam("pretty") final boolean pretty,
-        @QueryParam("raw") final boolean raw
-    ) throws IOException
+    public StreamingOutput listingToJson(@QueryParam("path") final String path,
+                                         @QueryParam("recursive") final boolean recursive,
+                                         @QueryParam("pretty") final boolean pretty,
+                                         @QueryParam("raw") final boolean raw) throws IOException
     {
         final HdfsListing hdfsListing = hdfsReader.getListing(path, raw, recursive);
 
@@ -138,10 +136,8 @@ public class HdfsBrowser
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/text")
     @Timed
-    public Viewable dirToJson(
-        @QueryParam("path") final String path,
-        @QueryParam("recursive") final boolean recursive
-    ) throws IOException
+    public Viewable dirToJson(@QueryParam("path") final String path,
+                              @QueryParam("recursive") final boolean recursive) throws IOException
     {
         return new Viewable("/rest/contentRaw.jsp", hdfsReader.getListing(path, true, recursive));
     }
@@ -171,7 +167,7 @@ public class HdfsBrowser
         final String objectURIDecoded = URLDecoder.decode(object, "UTF-8");
         final byte[] objectBase64Decoded = Base64.decodeBase64(objectURIDecoded.getBytes());
 
-        mapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
+        mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
         final LinkedHashMap map = mapper.readValue(new String(objectBase64Decoded), LinkedHashMap.class);
 
         // We need to re-serialize the json (pretty print works only on serialization)
@@ -183,15 +179,13 @@ public class HdfsBrowser
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     @Timed
-    public Response upload(
-        final InputStream body,
-        @QueryParam("path") final String outputPath,
-        @QueryParam("overwrite") @DefaultValue("false") final boolean overwrite,
-        @QueryParam("replication") @DefaultValue("3") final short replication,
-        @QueryParam("blocksize") @DefaultValue("-1") long blocksize,
-        // Either in octal or symbolic format
-        @QueryParam("permission") @DefaultValue("u=rw,go=r") final String permission
-    ) throws IOException
+    public Response upload(final InputStream body,
+                           @QueryParam("path") final String outputPath,
+                           @QueryParam("overwrite") @DefaultValue("false") final boolean overwrite,
+                           @QueryParam("replication") @DefaultValue("3") final short replication,
+                           @QueryParam("blocksize") @DefaultValue("-1") long blocksize,
+                           // Either in octal or symbolic format
+                           @QueryParam("permission") @DefaultValue("u=rw,go=r") final String permission) throws IOException
     {
         if (outputPath == null) {
             return Response.status(Response.Status.BAD_REQUEST).header("Warning", "199 " + "path cannot be null").cacheControl(cacheControl).build();
@@ -223,10 +217,8 @@ public class HdfsBrowser
     @DELETE
     @Produces(MediaType.TEXT_PLAIN)
     @Timed
-    public Response delete(
-        @QueryParam("path") final String outputPath,
-        @QueryParam("recursive") @DefaultValue("false") final boolean recursive
-    ) throws IOException
+    public Response delete(@QueryParam("path") final String outputPath,
+                           @QueryParam("recursive") @DefaultValue("false") final boolean recursive) throws IOException
     {
         try {
             hdfsWriter.delete(outputPath, recursive);

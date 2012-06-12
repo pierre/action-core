@@ -16,14 +16,15 @@
 
 package com.ning.metrics.action.binder.modules;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.ning.metrics.action.binder.config.ActionCoreConfig;
 import com.ning.metrics.action.schema.GoodwillRegistrar;
 import com.ning.metrics.action.schema.NoOpRegistrar;
 import com.ning.metrics.action.schema.Registrar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
 
 public class RegistrarProvider implements Provider<Registrar>
 {

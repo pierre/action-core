@@ -18,8 +18,10 @@ package com.ning.metrics.action.hdfs.data;
 
 import com.ning.metrics.action.hdfs.data.parser.RowParser;
 import com.ning.metrics.action.schema.Registrar;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,10 +50,8 @@ abstract class RowFileContentsIterator implements Iterator<Row>, Closeable
 
     @JsonCreator
     @SuppressWarnings("unused")
-    public RowFileContentsIterator(
-        @JsonProperty(JSON_CONTENT_PATH) final String path,
-        @JsonProperty(JSON_CONTENT_ENTRIES) final List<Row> entries
-    )
+    public RowFileContentsIterator(@JsonProperty(JSON_CONTENT_PATH) final String path,
+                                   @JsonProperty(JSON_CONTENT_ENTRIES) final List<Row> entries)
     {
         this(path, null, null, true);
     }

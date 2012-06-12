@@ -16,16 +16,18 @@
 
 package com.ning.metrics.action.hdfs.reader;
 
-import com.google.common.collect.ImmutableList;
 import com.ning.metrics.action.hdfs.data.RowFileContentsIteratorFactory;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.google.common.collect.ImmutableList;
+
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.util.DefaultPrettyPrinter;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -54,11 +56,9 @@ public class HdfsListing
 
     @JsonCreator
     @SuppressWarnings("unused")
-    public HdfsListing(
-        @JsonProperty(JSON_LISTING_PATH) String path,
-        @JsonProperty(JSON_LISTING_PARENT_PATH) String parentPath,
-        @JsonProperty(JSON_LISTING_ENTRIES) List<HdfsEntry> entries
-    )
+    public HdfsListing(@JsonProperty(JSON_LISTING_PATH) String path,
+                       @JsonProperty(JSON_LISTING_PARENT_PATH) String parentPath,
+                       @JsonProperty(JSON_LISTING_ENTRIES) List<HdfsEntry> entries)
     {
         this.path = new Path(path);
         this.parentPath = parentPath;
@@ -159,9 +159,9 @@ public class HdfsListing
     public String toString()
     {
         return "HdfsListing{" +
-            "path='" + path + '\'' +
-            ", parentPath='" + parentPath + '\'' +
-            ", entries=" + entries +
-            '}';
+               "path='" + path + '\'' +
+               ", parentPath='" + parentPath + '\'' +
+               ", entries=" + entries +
+               '}';
     }
 }

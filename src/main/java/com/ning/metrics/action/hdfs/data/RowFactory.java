@@ -18,7 +18,8 @@ package com.ning.metrics.action.hdfs.data;
 
 import com.ning.metrics.action.hdfs.data.schema.RowSchema;
 import com.ning.metrics.serialization.thrift.item.DataItem;
-import org.codehaus.jackson.JsonNode;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.List;
 

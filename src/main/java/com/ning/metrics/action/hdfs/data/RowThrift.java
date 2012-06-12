@@ -20,10 +20,12 @@ import com.ning.metrics.action.hdfs.data.schema.RowSchema;
 import com.ning.metrics.serialization.thrift.item.DataItem;
 import com.ning.metrics.serialization.thrift.item.DataItemDeserializer;
 import com.ning.metrics.serialization.thrift.item.DataItemFactory;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.apache.hadoop.io.WritableUtils;
 import org.apache.thrift.protocol.TType;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.io.DataInput;
 import java.io.DataOutput;

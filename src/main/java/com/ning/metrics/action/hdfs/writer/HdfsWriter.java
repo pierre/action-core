@@ -16,7 +16,6 @@
 
 package com.ning.metrics.action.hdfs.writer;
 
-import com.google.inject.Inject;
 import com.ning.metrics.serialization.hadoop.FileSystemAccess;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
@@ -24,6 +23,7 @@ import org.apache.hadoop.fs.permission.FsPermission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;

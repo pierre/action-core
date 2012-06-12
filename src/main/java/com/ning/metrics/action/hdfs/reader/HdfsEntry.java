@@ -18,16 +18,17 @@ package com.ning.metrics.action.hdfs.reader;
 
 import com.ning.metrics.action.hdfs.data.Row;
 import com.ning.metrics.action.hdfs.data.RowFileContentsIteratorFactory;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonGenerator;
+
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
 import org.joda.time.DateTime;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.util.Iterator;
 
@@ -58,13 +59,11 @@ public class HdfsEntry
 
     @JsonCreator
     @SuppressWarnings("unused")
-    public HdfsEntry(
-        @JsonProperty(JSON_ENTRY_PATH) String path,
-        @JsonProperty(JSON_ENTRY_MTIME) long mtime,
-        @JsonProperty(JSON_ENTRY_SIZE) long sizeInBytes,
-        @JsonProperty(JSON_ENTRY_REPLICATION) short replication,
-        @JsonProperty(JSON_ENTRY_IS_DIR) boolean isDirectory
-    )
+    public HdfsEntry(@JsonProperty(JSON_ENTRY_PATH) String path,
+                     @JsonProperty(JSON_ENTRY_MTIME) long mtime,
+                     @JsonProperty(JSON_ENTRY_SIZE) long sizeInBytes,
+                     @JsonProperty(JSON_ENTRY_REPLICATION) short replication,
+                     @JsonProperty(JSON_ENTRY_IS_DIR) boolean isDirectory)
     {
         this.fs = null;
         this.path = new Path(path);
@@ -194,11 +193,11 @@ public class HdfsEntry
     public String toString()
     {
         return "HdfsEntry{" +
-            "path='" + path + '\'' +
-            ", size=" + size +
-            ", replicatedSize=" + replicatedSize +
-            ", modificationDate=" + modificationDate +
-            ", directory=" + directory +
-            '}';
+               "path='" + path + '\'' +
+               ", size=" + size +
+               ", replicatedSize=" + replicatedSize +
+               ", modificationDate=" + modificationDate +
+               ", directory=" + directory +
+               '}';
     }
 }

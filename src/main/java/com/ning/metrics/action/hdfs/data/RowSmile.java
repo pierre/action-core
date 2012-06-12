@@ -17,12 +17,14 @@
 package com.ning.metrics.action.hdfs.data;
 
 import com.ning.metrics.action.hdfs.data.schema.RowSchema;
+
+import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.hadoop.io.WritableUtils;
-import org.codehaus.jackson.JsonEncoding;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
@@ -111,13 +113,13 @@ public class RowSmile extends Row<JsonNodeComparable, Serializable>
             return "";
         }
         else if (item.getDelegate().isNumber()) {
-            return item.getDelegate().getNumberValue();
+            return item.getDelegate().numberValue();
         }
         else if (item.getDelegate().isBoolean()) {
-            return item.getDelegate().getBooleanValue();
+            return item.getDelegate().booleanValue();
         }
         else if (item.getDelegate().isTextual()) {
-            return item.getDelegate().getTextValue();
+            return item.getDelegate().textValue();
         }
         else if (item.getDelegate().isNull()) {
             return "";

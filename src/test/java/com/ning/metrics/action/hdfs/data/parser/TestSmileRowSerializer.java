@@ -16,14 +16,16 @@
 
 package com.ning.metrics.action.hdfs.data.parser;
 
-import com.google.common.collect.ImmutableMap;
 import com.ning.metrics.action.hdfs.data.RowSmile;
 import com.ning.metrics.action.hdfs.data.Rows;
 import com.ning.metrics.action.schema.Registrar;
 import com.ning.metrics.goodwill.access.GoodwillSchemaField;
 import com.ning.metrics.serialization.event.SmileEnvelopeEvent;
 import com.ning.metrics.serialization.smile.SmileEnvelopeEventSerializer;
-import org.codehaus.jackson.node.ValueNode;
+
+import com.fasterxml.jackson.databind.node.ValueNode;
+import com.google.common.collect.ImmutableMap;
+
 import org.joda.time.DateTime;
 import org.testng.Assert;
 import org.testng.annotations.Test;

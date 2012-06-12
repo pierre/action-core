@@ -16,9 +16,9 @@
 
 package com.ning.metrics.action.hdfs.data;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.JsonToken;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Iterator;
 import java.util.List;
@@ -45,13 +45,13 @@ public class JsonNodeComparable extends JsonNode implements Comparable
         }
 
         int mySize = 0;
-        Iterator<JsonNode> myIterator = getElements();
+        Iterator<JsonNode> myIterator = elements();
         while (myIterator.hasNext()) {
             mySize++;
         }
 
         int hisSize = 0;
-        Iterator<JsonNode> hisIterator = thing.getElements();
+        Iterator<JsonNode> hisIterator = thing.elements();
         while (hisIterator.hasNext()) {
             hisSize++;
         }
@@ -68,7 +68,7 @@ public class JsonNodeComparable extends JsonNode implements Comparable
 
         // Looks like both nodes don't have children
         if (isValueNode() && thing.isValueNode()) {
-            return getValueAsText().compareTo(thing.getValueAsText());
+            return textValue().compareTo(thing.textValue());
         }
         else {
             if (equals(thing)) {
@@ -84,7 +84,7 @@ public class JsonNodeComparable extends JsonNode implements Comparable
     /**
      * Method that can be used for efficient type detection
      * when using stream abstraction for traversing nodes.
-     * Will return the first {@link org.codehaus.jackson.JsonToken} that equivalent
+     * Will return the first {@link com.fasterxml.jackson.core.JsonToken} that equivalent
      * stream event would produce (for most nodes there is just
      * one token but for structured/container types multiple)
      *
@@ -102,9 +102,9 @@ public class JsonNodeComparable extends JsonNode implements Comparable
      * value.
      */
     @Override
-    public JsonParser.NumberType getNumberType()
+    public JsonParser.NumberType numberType()
     {
-        return delegate.getNumberType();
+        return delegate.numberType();
     }
 
     /**
@@ -130,9 +130,9 @@ public class JsonNodeComparable extends JsonNode implements Comparable
      * {@link #toString} instead.
      */
     @Override
-    public String getValueAsText()
+    public String textValue()
     {
-        return delegate.getValueAsText();
+        return delegate.textValue();
     }
 
     /**
@@ -231,7 +231,7 @@ public class JsonNodeComparable extends JsonNode implements Comparable
     }
 
     /**
-     * Method for constructing a {@link org.codehaus.jackson.JsonParser} instance for
+     * Method for constructing a {@link com.fasterxml.jackson.core.JsonParser} instance for
      * iterating over contents of the tree that this
      * node is root of.
      */
@@ -265,6 +265,12 @@ public class JsonNodeComparable extends JsonNode implements Comparable
     public boolean equals(Object o)
     {
         return delegate.equals(o);
+    }
+
+    @Override
+    public <T extends JsonNode> T deepCopy()
+    {
+        return (T) delegate;
     }
 
     public JsonNode getDelegate()

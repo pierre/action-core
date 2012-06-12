@@ -17,12 +17,12 @@
 package com.ning.metrics.action.hdfs.reader;
 
 import com.google.common.io.ByteStreams;
-import com.google.inject.Inject;
 import com.ning.metrics.action.hdfs.data.RowFileContentsIteratorFactory;
 import com.ning.metrics.serialization.hadoop.FileSystemAccess;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.Path;
 
+import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;

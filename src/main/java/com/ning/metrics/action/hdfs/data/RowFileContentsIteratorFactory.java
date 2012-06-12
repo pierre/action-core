@@ -16,8 +16,6 @@
 
 package com.ning.metrics.action.hdfs.data;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.ning.metrics.action.hdfs.data.parser.RowParser;
 import com.ning.metrics.action.schema.Registrar;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -25,6 +23,8 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.Iterator;
 

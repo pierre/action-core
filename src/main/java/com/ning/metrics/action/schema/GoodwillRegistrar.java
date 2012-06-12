@@ -16,12 +16,12 @@
 
 package com.ning.metrics.action.schema;
 
-import com.google.inject.Inject;
 import com.ning.metrics.action.binder.config.ActionCoreConfig;
 import com.ning.metrics.goodwill.access.CachingGoodwillAccessor;
 import com.ning.metrics.goodwill.access.GoodwillSchema;
 import com.ning.metrics.goodwill.access.GoodwillSchemaField;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;

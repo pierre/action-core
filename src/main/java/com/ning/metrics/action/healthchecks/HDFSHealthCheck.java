@@ -16,33 +16,28 @@
 
 package com.ning.metrics.action.healthchecks;
 
-import com.google.inject.Inject;
 import com.ning.metrics.serialization.hadoop.FileSystemAccess;
+
 import com.yammer.metrics.core.HealthCheck;
+
 import org.apache.hadoop.fs.FileSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.weakref.jmx.Managed;
 
+import javax.inject.Inject;
 import java.io.IOException;
 
 public class HDFSHealthCheck extends HealthCheck
 {
-    private static final Logger log = LoggerFactory.getLogger(HDFSHealthCheck.class);
-
     private final FileSystemAccess fileSystemAccess;
     private static final long MAX_WAIT_TIME = 10000; // 10 seconds
 
     @Inject
     public HDFSHealthCheck(final FileSystemAccess fileSystemAccess)
     {
+        super("HDFSHealthCheck");
         this.fileSystemAccess = fileSystemAccess;
-    }
-
-    @Override
-    public String name()
-    {
-        return "HDFSHealthCheck";
     }
 
     @Override
