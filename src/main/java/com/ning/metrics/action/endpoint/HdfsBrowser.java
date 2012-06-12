@@ -23,7 +23,6 @@ import com.ning.metrics.action.hdfs.writer.HdfsWriter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.inject.Inject;
 import com.sun.jersey.api.view.Viewable;
 import com.yammer.metrics.annotation.Timed;
 
@@ -32,6 +31,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
